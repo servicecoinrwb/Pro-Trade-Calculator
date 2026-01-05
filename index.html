@@ -473,7 +473,8 @@
             <div class="form-group">
                 <label>Trader Persona</label>
                 <select id="styleSelect" onchange="saveStyle()">
-                    <option value="contrarian" selected>Contrarian (Trap Hunter)</option>
+                    <option value="auto" selected>✨ Auto-Detect (AI Decides)</option>
+                    <option value="contrarian">Contrarian (Trap Hunter)</option>
                     <option value="trend">Trend Follower (Surfer)</option>
                     <option value="smc">Smart Money (ICT/SMC)</option>
                     <option value="breakout">Breakout (Momentum)</option>
@@ -827,6 +828,13 @@
     function updateGuide(style) {
         document.querySelectorAll('.strategy-guide').forEach(el => el.style.display = 'none');
         const selectedGuide = document.getElementById(`guide-${style}`);
+        
+        // If style is auto, default to showing nothing or contrarian until detected
+        if (style === 'auto') {
+            document.getElementById('guideSubtitle').innerText = "Waiting for Analysis...";
+            return;
+        }
+
         if (selectedGuide) selectedGuide.style.display = 'block';
 
         const titles = {
@@ -886,7 +894,18 @@
         try {
             let personaInstructions = "";
 
-            if (styleId === 'contrarian') {
+            if (styleId === 'auto') {
+                personaInstructions = `
+                ROLE: Master Trading Strategist.
+                TASK: First, determine the market condition (Trending, Ranging, Reversal).
+                DECISION: Select the single best trading persona for this specific chart:
+                    - "contrarian" (Fade extremes/SFP)
+                    - "trend" (Follow strong moves)
+                    - "smc" (Liquidity/FVG)
+                    - "breakout" (Volatility expansion)
+                ANALYSIS: Analyze the chart using ONLY that selected persona's rules.
+                `;
+            } else if (styleId === 'contrarian') {
                 personaInstructions = `
                 ROLE: Professional Contrarian Trader (Fade the move).
                 FOCUS: Liquidity Grabs, Swing Failure Patterns (SFP), Fakeouts, Overextended RSI, Divergence.
@@ -924,9 +943,10 @@
                 3. SIGNAL: Is there a valid setup RIGHT NOW based on your specific rules?
                 4. PLAN: If valid, give Entry, SL, and TP. If not, explain why to wait.
 
-                IMPORTANT: At the end, output the trade values in this exact JSON format:
+                IMPORTANT: At the end, output the trade values in this exact JSON format. 
+                If using Auto-Detect, you MUST include the "persona" key (e.g., "trend", "contrarian", "smc", "breakout").
                 \`\`\`json
-                { "entry": 123.45, "sl": 120.00, "tp": 130.00 }
+                { "entry": 123.45, "sl": 120.00, "tp": 130.00, "persona": "trend" }
                 \`\`\`
             `;
 
@@ -961,6 +981,19 @@
             if (jsonMatch && jsonMatch[1]) {
                 foundSetup = JSON.parse(jsonMatch[1]);
                 btnApply.style.display = 'block';
+
+                // AUTO-SWITCH GUIDE LOGIC
+                if (foundSetup.persona) {
+                    const detected = foundSetup.persona.toLowerCase();
+                    const validStyles = ['contrarian', 'trend', 'smc', 'breakout'];
+                    if (validStyles.includes(detected)) {
+                        document.getElementById('styleSelect').value = detected;
+                        saveStyle(); // Update guide & local storage
+                        
+                        // Add a small visual note that we switched
+                        output.innerHTML = `<div style="background:#222; border-left:3px solid var(--accent-green); padding:8px; margin-bottom:10px; font-size:0.8rem;">✨ <strong>Auto-Detect:</strong> Switched to ${detected.toUpperCase()} strategy based on chart structure.</div>` + output.innerHTML;
+                    }
+                }
             }
 
         } catch (error) {
@@ -1071,12 +1104,14 @@
         document.getElementById('modelSelect').value = localStorage.getItem('gemini_model');
     }
     
+    // AUTO Select by default if not set
     if (localStorage.getItem('gemini_style')) {
         const savedStyle = localStorage.getItem('gemini_style');
         document.getElementById('styleSelect').value = savedStyle;
         updateGuide(savedStyle);
     } else {
-        updateGuide('contrarian'); // Default
+        document.getElementById('styleSelect').value = 'auto'; // Default to auto
+        updateGuide('auto');
     }
 
     if (localStorage.getItem('univ_bal')) document.getElementById('balance').value = localStorage.getItem('univ_bal');
