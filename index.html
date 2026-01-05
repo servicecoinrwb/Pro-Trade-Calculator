@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Visual Trade Calculator</title>
+    <title>Pro Visual Trade Calculator + AI Analyst</title>
+    <!-- Import Markdown Parser for AI responses -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --bg-color: #121212;
@@ -14,40 +16,41 @@
             --accent-blue: #2979ff;
             --accent-green: #00e676;
             --accent-red: #ff1744;
-            --line-entry: #28a745; /* MT4 Green */
-            --line-sl: #dc3545;    /* MT4 Red */
-            --line-tp: #007bff;    /* MT4 Blue */
+            --accent-purple: #d500f9;
+            --line-entry: #28a745;
+            --line-sl: #dc3545;
+            --line-tp: #007bff;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
             padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
         }
 
-        .container {
+        .main-wrapper {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
-            max-width: 900px;
+            max-width: 1300px;
             width: 100%;
+            justify-content: center;
         }
 
-        /* --- LEFT PANEL: CONTROLS --- */
-        .calculator-panel {
-            flex: 1;
-            min-width: 320px;
+        /* --- SHARED PANEL STYLES --- */
+        .panel {
             background-color: var(--panel-bg);
             padding: 25px;
             border-radius: 16px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
             border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
         }
 
         h2 { margin: 0 0 5px 0; text-align: center; font-size: 1.2rem; }
@@ -55,25 +58,42 @@
 
         .form-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 5px; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
-        select, input { width: 100%; padding: 12px; background-color: var(--input-bg); border: 1px solid #333; border-radius: 8px; color: white; font-size: 0.95rem; box-sizing: border-box; outline: none; transition: 0.2s; }
-        select:focus, input:focus { border-color: var(--accent-blue); background-color: #333; }
+        
+        select, input, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            background-color: var(--input-bg); 
+            border: 1px solid #333; 
+            border-radius: 8px; 
+            color: white; 
+            font-size: 0.95rem; 
+            box-sizing: border-box; 
+            outline: none; 
+            transition: 0.2s; 
+            font-family: inherit;
+        }
+        select:focus, input:focus, textarea:focus { border-color: var(--accent-blue); background-color: #333; }
+        
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        
+        /* --- LEFT: CALCULATOR --- */
+        .calculator-panel {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+        }
 
-        /* --- RIGHT PANEL: VISUAL CHART --- */
+        /* --- MIDDLE: VISUAL CHART --- */
         .chart-panel {
             flex: 1;
-            min-width: 320px;
-            background-color: var(--panel-bg);
-            border-radius: 16px;
-            border: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            min-width: 300px;
             position: relative;
+            overflow: hidden;
+            padding: 0; /* Remove padding for header styling */
         }
 
         .chart-header {
-            padding: 15px;
+            padding: 15px 25px;
             background: #252525;
             border-bottom: 1px solid #333;
             font-size: 0.9rem;
@@ -84,16 +104,15 @@
 
         .chart-area {
             flex: 1;
-            background: #181818; /* Dark Chart Background */
+            background: #181818;
             background-image: 
                 linear-gradient(#222 1px, transparent 1px),
                 linear-gradient(90deg, #222 1px, transparent 1px);
             background-size: 20px 20px;
             position: relative;
-            min-height: 300px;
+            min-height: 400px;
         }
 
-        /* Chart Lines */
         .trade-line {
             position: absolute;
             width: 100%;
@@ -118,14 +137,99 @@
 
         .line-entry { border-color: var(--line-entry); z-index: 10; }
         .line-entry .line-label { background: var(--line-entry); }
-
         .line-sl { border-color: var(--line-sl); z-index: 5; }
         .line-sl .line-label { background: var(--line-sl); }
-
         .line-tp { border-color: var(--line-tp); z-index: 5; }
         .line-tp .line-label { background: var(--line-tp); }
 
-        /* Result Box inside Calculator */
+        /* --- RIGHT: AI ANALYST --- */
+        .ai-panel {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+            border-color: var(--accent-purple);
+        }
+
+        .ai-header { color: var(--accent-purple); display:flex; align-items:center; justify-content: center; gap:8px;}
+        
+        .drop-zone {
+            border: 2px dashed #444;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 12px;
+            position: relative;
+            background: #252525;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .drop-zone:hover { border-color: var(--accent-purple); background: #2a2a2a; }
+        .drop-zone p { margin: 0; font-size: 0.8rem; color: #888; pointer-events: none; }
+        .drop-zone input[type="file"] {
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer;
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+            border: 1px solid #444;
+        }
+
+        .btn-ai {
+            background: linear-gradient(45deg, #7c4dff, #d500f9);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: 0.2s;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .btn-ai:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-ai:disabled { background: #444; cursor: not-allowed; opacity: 0.6; }
+
+        .btn-apply {
+            background: var(--accent-green);
+            color: #000;
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+            cursor: pointer;
+            display: none;
+        }
+
+        .ai-output {
+            margin-top: 15px;
+            background: #252525;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            color: #ddd;
+        }
+        /* Markdown Styles */
+        .ai-output h3 { margin-top:0; color: var(--accent-purple); }
+        .ai-output strong { color: white; }
+        .ai-output ul { padding-left: 20px; }
+
+        /* Calculator Results */
         .result-box {
             background: #252525;
             padding: 20px;
@@ -136,7 +240,6 @@
         }
         .lot-display { font-size: 2.5rem; font-weight: 800; color: var(--accent-green); margin: 5px 0; }
         .error-msg { color: var(--accent-red); font-size: 0.8rem; height: 1.2em; }
-
         .profit-stats {
             display: flex;
             justify-content: space-between;
@@ -147,13 +250,25 @@
             border-top: 1px dashed #444;
         }
 
+        .api-input-group { position: relative; }
+        .api-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="main-wrapper">
     
-    <div class="calculator-panel">
+    <!-- LEFT PANEL: CALCULATOR -->
+    <div class="calculator-panel panel">
         <h2>Pro Trade Calculator</h2>
         <div class="subtitle">Enter your setup</div>
 
@@ -221,7 +336,8 @@
         </div>
     </div>
 
-    <div class="chart-panel">
+    <!-- MIDDLE PANEL: VISUAL CHART -->
+    <div class="chart-panel panel">
         <div class="chart-header">
             <span>Trade Preview</span>
             <span id="ratioDisplay" style="color:var(--accent-green);">R:R --</span>
@@ -235,9 +351,45 @@
         </div>
     </div>
 
+    <!-- RIGHT PANEL: AI ANALYST -->
+    <div class="ai-panel panel">
+        <h2 class="ai-header">
+            <span style="font-size:1.5rem;">🤖</span> AI Analyst
+        </h2>
+        <div class="subtitle">Upload chart for analysis</div>
+
+        <div class="form-group">
+            <label>Gemini API Key</label>
+            <div class="api-input-group">
+                <input type="password" id="apiKey" placeholder="Paste Key Here..." onchange="saveApiKey()">
+                <span class="api-toggle" onclick="toggleKeyVis()">👁️</span>
+            </div>
+            <div style="font-size:0.6rem; color:#666; margin-top:4px;">
+                Key is stored locally in your browser. <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#666;">Get Key</a>
+            </div>
+        </div>
+
+        <div class="drop-zone" id="dropZone">
+            <p>Drag Chart Image Here<br>or Click to Upload</p>
+            <input type="file" id="imageInput" accept="image/*" onchange="handleImage(this)">
+            <img id="previewImg" class="image-preview" />
+        </div>
+
+        <button class="btn-ai" id="btnAnalyze" onclick="analyzeChart()" disabled>Analyze Chart</button>
+        
+        <button class="btn-apply" id="btnApply" onclick="applyAiValues()">
+            ✨ Apply Setup to Calculator
+        </button>
+
+        <div class="ai-output" id="aiOutput" style="display:none;"></div>
+    </div>
+
 </div>
 
 <script>
+    /* =========================================
+       CALCULATOR LOGIC
+       ========================================= */
     const PRESETS = {
         'BTC':    { ts: 0.01, tv: 0.01 },
         'US30':   { ts: 1.0,  tv: 5.0 },
@@ -259,11 +411,10 @@
             document.getElementById('tickSize').value = PRESETS[type].ts;
             document.getElementById('tickValue').value = PRESETS[type].tv;
         }
-        saveAndCalc(); // Auto-save when changing preset
+        saveAndCalc();
     }
 
     function calc() {
-        // 1. Get Values
         const balance = parseFloat(document.getElementById('balance').value) || 0;
         const riskPerc = parseFloat(document.getElementById('risk').value) || 0;
         const fees = parseFloat(document.getElementById('fees').value) || 0;
@@ -275,7 +426,6 @@
         const tickSize = parseFloat(document.getElementById('tickSize').value);
         const tickValue = parseFloat(document.getElementById('tickValue').value);
 
-        // 2. Logic
         let displayLots = "0.00";
         let riskCash = 0;
         let profitCash = 0;
@@ -302,7 +452,6 @@
                     displayLots = lots < 0.1 ? lots.toFixed(3) : lots.toFixed(2);
                     riskCash = netRisk;
 
-                    // TP Logic
                     if (tp) {
                         const tpDist = Math.abs(entry - tp);
                         const profitPerLot = (tpDist / tickSize) * tickValue;
@@ -313,13 +462,11 @@
             }
         }
 
-        // 3. Update Text UI
         document.getElementById('lotResult').innerText = displayLots;
         document.getElementById('riskDisplay').innerText = `Risk: $${riskCash.toFixed(2)}`;
         document.getElementById('profitDisplay').innerText = `Profit: $${profitCash.toFixed(2)}`;
         document.getElementById('ratioDisplay').innerText = tp ? `R:R 1:${rr.toFixed(1)}` : "R:R --";
 
-        // 4. Update Visual Chart
         drawChart(entry, sl, tp);
     }
 
@@ -335,29 +482,24 @@
             return;
         }
 
-        // Determine range to display
-        // We need min and max price of all inputs to scale the chart
         let prices = [entry, sl];
         if (tp) prices.push(tp);
 
         let minP = Math.min(...prices);
         let maxP = Math.max(...prices);
         
-        // Add 10% padding
         let range = maxP - minP;
-        if (range === 0) range = entry * 0.01; // prevent zero range
+        if (range === 0) range = entry * 0.01;
         
         let pad = range * 0.2;
         let chartMin = minP - pad;
         let chartMax = maxP + pad;
         let chartRange = chartMax - chartMin;
 
-        // Helper to get % position (Top is 0%, Bottom is 100%)
         function getPos(price) {
             return 100 - ((price - chartMin) / chartRange * 100);
         }
 
-        // Set Positions
         lineEntry.style.display = 'flex';
         lineEntry.style.top = getPos(entry) + "%";
         lineEntry.querySelector('.line-label').innerText = "ENTRY " + entry;
@@ -376,7 +518,6 @@
     }
 
     function saveAndCalc() {
-        // SAVE EVERYTHING
         localStorage.setItem('univ_asset', document.getElementById('assetSelect').value);
         localStorage.setItem('univ_bal', document.getElementById('balance').value);
         localStorage.setItem('univ_risk', document.getElementById('risk').value);
@@ -384,17 +525,127 @@
         localStorage.setItem('univ_entry', document.getElementById('entry').value);
         localStorage.setItem('univ_sl', document.getElementById('sl').value);
         localStorage.setItem('univ_tp', document.getElementById('tp').value);
-        
-        // Also save tick data in case Custom was used
         localStorage.setItem('univ_ts', document.getElementById('tickSize').value);
         localStorage.setItem('univ_tv', document.getElementById('tickValue').value);
-
         calc();
     }
 
+    /* =========================================
+       AI ANALYST LOGIC
+       ========================================= */
+    let currentBase64 = null;
+    let foundSetup = null;
+
+    function saveApiKey() {
+        const key = document.getElementById('apiKey').value;
+        localStorage.setItem('gemini_key', key);
+    }
+
+    function toggleKeyVis() {
+        const input = document.getElementById('apiKey');
+        input.type = input.type === "password" ? "text" : "password";
+    }
+
+    function handleImage(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                currentBase64 = e.target.result.split(',')[1]; // Remove 'data:image/...' prefix
+                const img = document.getElementById('previewImg');
+                img.src = e.target.result;
+                img.style.display = 'block';
+                document.getElementById('btnAnalyze').disabled = false;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async function analyzeChart() {
+        const apiKey = document.getElementById('apiKey').value;
+        const output = document.getElementById('aiOutput');
+        const btn = document.getElementById('btnAnalyze');
+        const btnApply = document.getElementById('btnApply');
+
+        if (!apiKey) {
+            alert("Please enter a valid Gemini API Key.");
+            return;
+        }
+
+        output.style.display = 'block';
+        output.innerHTML = "⏳ Analyzing chart patterns... (this may take a few seconds)";
+        btn.disabled = true;
+        btnApply.style.display = 'none';
+
+        try {
+            const promptText = `
+                Analyze this technical trading chart image.
+                1. Identify the likely asset (if visible).
+                2. Determine the current Trend (Bullish/Bearish/Ranging).
+                3. Identify any Key Patterns (Flags, Wedges, Support/Resistance levels).
+                4. Suggest a specific Trade Setup with Entry, Stop Loss, and Take Profit.
+                
+                IMPORTANT: At the very end of your response, output the trade values in this exact JSON format so I can parse it:
+                \`\`\`json
+                { "entry": 123.45, "sl": 120.00, "tp": 130.00 }
+                \`\`\`
+            `;
+
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            { text: promptText },
+                            { inline_data: { mime_type: "image/jpeg", data: currentBase64 } }
+                        ]
+                    }]
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error.message);
+            }
+
+            const aiText = data.candidates[0].content.parts[0].text;
+            
+            // Render Markdown
+            output.innerHTML = marked.parse(aiText);
+
+            // Extract JSON for Auto-Fill
+            const jsonMatch = aiText.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+            if (jsonMatch && jsonMatch[1]) {
+                foundSetup = JSON.parse(jsonMatch[1]);
+                btnApply.style.display = 'block';
+            }
+
+        } catch (error) {
+            output.innerHTML = `<span style="color:var(--accent-red)">Error: ${error.message}</span>`;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    function applyAiValues() {
+        if (foundSetup) {
+            if(foundSetup.entry) document.getElementById('entry').value = foundSetup.entry;
+            if(foundSetup.sl) document.getElementById('sl').value = foundSetup.sl;
+            if(foundSetup.tp) document.getElementById('tp').value = foundSetup.tp;
+            saveAndCalc();
+            // Scroll to calculator
+            document.querySelector('.calculator-panel').scrollIntoView({behavior: 'smooth'});
+        }
+    }
+
     // --- INIT ---
-    // Restore all values from storage
-    if (localStorage.getItem('univ_asset')) document.getElementById('assetSelect').value = localStorage.getItem('univ_asset');
+    if (localStorage.getItem('gemini_key')) {
+        document.getElementById('apiKey').value = localStorage.getItem('gemini_key');
+    }
+
     if (localStorage.getItem('univ_bal')) document.getElementById('balance').value = localStorage.getItem('univ_bal');
     if (localStorage.getItem('univ_risk')) document.getElementById('risk').value = localStorage.getItem('univ_risk');
     if (localStorage.getItem('univ_fees')) document.getElementById('fees').value = localStorage.getItem('univ_fees');
@@ -403,26 +654,22 @@
     if (localStorage.getItem('univ_sl')) document.getElementById('sl').value = localStorage.getItem('univ_sl');
     if (localStorage.getItem('univ_tp')) document.getElementById('tp').value = localStorage.getItem('univ_tp');
     
-    // Handle Asset/Tick Logic on load
+    // Logic for Asset Select
     const savedType = localStorage.getItem('univ_asset');
-    const customDiv = document.getElementById('customSpecs');
-    
     if (savedType === 'CUSTOM') {
-        customDiv.style.display = 'block';
+        document.getElementById('customSpecs').style.display = 'block';
         if (localStorage.getItem('univ_ts')) document.getElementById('tickSize').value = localStorage.getItem('univ_ts');
         if (localStorage.getItem('univ_tv')) document.getElementById('tickValue').value = localStorage.getItem('univ_tv');
     } else if (savedType) {
-        // If it's a standard preset, ensure ticks are correct
-        // (We re-apply them to ensure data integrity)
-        customDiv.style.display = 'none';
+        document.getElementById('customSpecs').style.display = 'none';
         document.getElementById('tickSize').value = PRESETS[savedType].ts;
         document.getElementById('tickValue').value = PRESETS[savedType].tv;
     } else {
-        // First ever load
         loadPreset();
     }
+    
+    if (savedType) document.getElementById('assetSelect').value = savedType;
 
-    // Run first calculation
     calc();
 
 </script>
