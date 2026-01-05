@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Visual Trade Calculator + AI Analyst</title>
+    <title>Pro Visual Trade Calculator + Smart AI Analyst</title>
     <!-- Import Markdown Parser for AI responses -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -17,6 +17,7 @@
             --accent-green: #00e676;
             --accent-red: #ff1744;
             --accent-purple: #d500f9;
+            --accent-orange: #ff9100;
             --line-entry: #28a745;
             --line-sl: #dc3545;
             --line-tp: #007bff;
@@ -37,7 +38,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
-            max-width: 1300px;
+            max-width: 1600px;
             width: 100%;
             justify-content: center;
         }
@@ -89,7 +90,7 @@
             min-width: 300px;
             position: relative;
             overflow: hidden;
-            padding: 0; /* Remove padding for header styling */
+            padding: 0; 
         }
 
         .chart-header {
@@ -150,7 +151,17 @@
             border-color: var(--accent-purple);
         }
 
+        /* --- NEW: GUIDE PANEL --- */
+        .guide-panel {
+            flex: 1;
+            min-width: 300px;
+            max-width: 350px;
+            border-color: var(--accent-orange);
+            background: #1a1a1a;
+        }
+
         .ai-header { color: var(--accent-purple); display:flex; align-items:center; justify-content: center; gap:8px;}
+        .guide-header { color: var(--accent-orange); display:flex; align-items:center; justify-content: center; gap:8px;}
         
         .drop-zone {
             border: 2px dashed #444;
@@ -224,10 +235,24 @@
             border: 1px solid #333;
             color: #ddd;
         }
-        /* Markdown Styles */
         .ai-output h3 { margin-top:0; color: var(--accent-purple); }
         .ai-output strong { color: white; }
         .ai-output ul { padding-left: 20px; }
+
+        /* Guide Panel Specifics */
+        .guide-section { margin-bottom: 20px; }
+        .guide-title { font-weight: bold; color: var(--accent-orange); font-size: 0.9rem; margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        
+        .schedule-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .schedule-table td { padding: 6px 0; border-bottom: 1px solid #333; }
+        .schedule-table tr:last-child td { border-bottom: none; }
+        .time-col { color: var(--text-main); font-weight: bold; width: 90px; }
+        .action-col { color: #aaa; }
+        .action-highlight { color: var(--accent-green); font-weight: bold; }
+        .action-danger { color: var(--accent-red); font-weight: bold; }
+
+        .rule-box { background: #252525; padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.8rem; border-left: 3px solid var(--accent-orange); }
+        .rule-box strong { color: white; display: block; margin-bottom: 4px; }
 
         /* Calculator Results */
         .result-box {
@@ -381,19 +406,25 @@
                 Key is stored locally in your browser. <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#666;">Get Key</a>
             </div>
         </div>
-
-        <!-- NEW MODEL SELECTOR: EXPANDED OPTIONS -->
-        <div class="form-group">
-            <label>AI Model</label>
-            <select id="modelSelect" onchange="saveModel()">
-                <option value="gemini-2.0-flash-exp" selected>Gemini 2.0 Flash (Recommended)</option>
-                <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                <option value="gemini-1.5-flash-001">Gemini 1.5 Flash-001</option>
-                <option value="gemini-1.5-flash-002">Gemini 1.5 Flash-002</option>
-                <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                <option value="gemini-1.5-pro-001">Gemini 1.5 Pro-001</option>
-                <option value="gemini-1.5-pro-002">Gemini 1.5 Pro-002</option>
-            </select>
+        
+        <div class="grid-2">
+            <div class="form-group">
+                <label>AI Model</label>
+                <select id="modelSelect" onchange="saveModel()">
+                    <option value="gemini-2.0-flash-exp" selected>Gemini 2.0 Flash</option>
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Trader Persona</label>
+                <select id="styleSelect" onchange="saveStyle()">
+                    <option value="contrarian" selected>Contrarian (Trap Hunter)</option>
+                    <option value="trend">Trend Follower (Surfer)</option>
+                    <option value="smc">Smart Money (ICT/SMC)</option>
+                    <option value="breakout">Breakout (Momentum)</option>
+                </select>
+            </div>
         </div>
 
         <div class="drop-zone" id="dropZone">
@@ -409,6 +440,60 @@
         </button>
 
         <div class="ai-output" id="aiOutput" style="display:none;"></div>
+    </div>
+
+    <!-- GUIDE PANEL (Focused on your specific Contrarian struggle) -->
+    <div class="guide-panel panel">
+        <h2 class="guide-header">
+            <span style="font-size:1.5rem;">🧠</span> Cheat Sheet
+        </h2>
+        <div class="subtitle">Contrarian Strategy Rules</div>
+
+        <div class="guide-section">
+            <div class="guide-title">⏰ The Schedule (EST)</div>
+            <table class="schedule-table">
+                <tr>
+                    <td class="time-col">09:30 AM</td>
+                    <td class="action-col action-danger">DO NOT TRADE (Fake moves)</td>
+                </tr>
+                <tr>
+                    <td class="time-col">10:00 AM</td>
+                    <td class="action-col action-highlight">LOOK FOR REVERSAL (SFP)</td>
+                </tr>
+                <tr>
+                    <td class="time-col">12:00 PM</td>
+                    <td class="action-col action-danger">NO TRADE (Lunch Chop)</td>
+                </tr>
+                <tr>
+                    <td class="time-col">02:00 PM</td>
+                    <td class="action-col action-highlight">AFTERNOON REVERSAL</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="guide-section">
+            <div class="guide-title">📊 Timeframe Rules</div>
+            <div class="rule-box">
+                <strong>❌ 1 MINUTE Chart</strong>
+                Only noise. Creates fake signals. Ignore it.
+            </div>
+            <div class="rule-box">
+                <strong>✅ 1 HOUR Chart</strong>
+                Use this to find Key Levels (Highs/Lows).
+            </div>
+            <div class="rule-box">
+                <strong>✅ 15 MINUTE Chart</strong>
+                Use this for ENTRY. Wait for candle CLOSE.
+            </div>
+        </div>
+
+        <div class="guide-section">
+            <div class="guide-title">🛡️ The Golden Rule</div>
+            <div style="font-size:0.8rem; color:#ccc; line-height:1.4;">
+                "I will not short a breakout until I see a candle <span style="color:var(--accent-orange); font-weight:bold;">try to go higher and FAIL (close lower)</span>."
+            </div>
+        </div>
+
     </div>
 
 </div>
@@ -564,16 +649,18 @@
     let foundSetup = null;
 
     function saveApiKey() {
-        // Clean key
         const input = document.getElementById('apiKey');
         const cleaned = input.value.trim();
         input.value = cleaned;
         localStorage.setItem('gemini_key', cleaned);
     }
     
-    // NEW: Save selected model
     function saveModel() {
         localStorage.setItem('gemini_model', document.getElementById('modelSelect').value);
+    }
+
+    function saveStyle() {
+        localStorage.setItem('gemini_style', document.getElementById('styleSelect').value);
     }
     
     function clearApiKey() {
@@ -593,7 +680,7 @@
             const reader = new FileReader();
             
             reader.onload = function(e) {
-                currentBase64 = e.target.result.split(',')[1]; // Remove 'data:image/...' prefix
+                currentBase64 = e.target.result.split(',')[1]; 
                 const img = document.getElementById('previewImg');
                 img.src = e.target.result;
                 img.style.display = 'block';
@@ -605,7 +692,8 @@
 
     async function analyzeChart() {
         const apiKey = document.getElementById('apiKey').value.trim();
-        const modelId = document.getElementById('modelSelect').value; // Get selected model
+        const modelId = document.getElementById('modelSelect').value;
+        const styleId = document.getElementById('styleSelect').value;
         const output = document.getElementById('aiOutput');
         const btn = document.getElementById('btnAnalyze');
         const btnApply = document.getElementById('btnApply');
@@ -615,25 +703,54 @@
             return;
         }
         
-        // Basic check
-        if (!apiKey.startsWith('AIza')) {
-            alert("Warning: That doesn't look like a standard API key (usually starts with AIza). Please double check.");
-        }
-
         output.style.display = 'block';
-        output.innerHTML = "⏳ Analyzing chart patterns... (this may take a few seconds)";
+        output.innerHTML = "⏳ Analyzing chart with " + styleId.toUpperCase() + " strategy...";
         btn.disabled = true;
         btnApply.style.display = 'none';
 
         try {
+            // --- DYNAMIC PROMPTS BASED ON PERSONA ---
+            let personaInstructions = "";
+
+            if (styleId === 'contrarian') {
+                personaInstructions = `
+                ROLE: Professional Contrarian Trader (Fade the move).
+                FOCUS: Liquidity Grabs, Swing Failure Patterns (SFP), Fakeouts, Overextended RSI, Divergence.
+                LOGIC: "If price breaks a High/Low, does it fail to close beyond it? If yes, FADE it."
+                WARN: Do not trade strong breakouts with no rejection.
+                `;
+            } else if (styleId === 'trend') {
+                personaInstructions = `
+                ROLE: Professional Trend Follower.
+                FOCUS: Moving Average Support, Bull/Bear Flags, Higher Highs/Lows, Pullbacks to value.
+                LOGIC: "The trend is your friend. Do not fade strong moves. Wait for a pullback to support and look for continuation."
+                WARN: Do not trade reversals against a strong trend.
+                `;
+            } else if (styleId === 'smc') {
+                personaInstructions = `
+                ROLE: Smart Money Concepts (ICT/SMC) Trader.
+                FOCUS: Fair Value Gaps (FVG), Order Blocks (OB), Market Structure Shifts (MSS), Discount vs Premium Arrays.
+                LOGIC: "Wait for price to tap into an Order Block or FVG, then look for displacement."
+                `;
+            } else if (styleId === 'breakout') {
+                personaInstructions = `
+                ROLE: Breakout Momentum Trader.
+                FOCUS: Triangles, Wedges, Range Contractions, Strong Candle Closes OUTSIDE of ranges.
+                LOGIC: "Do not guess. Wait for confirmed close outside the pattern with volume."
+                `;
+            }
+
             const promptText = `
-                Analyze this technical trading chart image.
-                1. Identify the likely asset (if visible).
-                2. Determine the current Trend (Bullish/Bearish/Ranging).
-                3. Identify any Key Patterns (Flags, Wedges, Support/Resistance levels).
-                4. Suggest a specific Trade Setup with Entry, Stop Loss, and Take Profit.
+                ${personaInstructions}
                 
-                IMPORTANT: At the very end of your response, output the trade values in this exact JSON format so I can parse it:
+                Analyze this chart image specifically using the Persona above.
+
+                1. TREND: What is the dominant trend?
+                2. PATTERN: What specific patterns (relevant to your Persona) do you see?
+                3. SIGNAL: Is there a valid setup RIGHT NOW based on your specific rules?
+                4. PLAN: If valid, give Entry, SL, and TP. If not, explain why to wait.
+
+                IMPORTANT: At the end, output the trade values in this exact JSON format:
                 \`\`\`json
                 { "entry": 123.45, "sl": 120.00, "tp": 130.00 }
                 \`\`\`
@@ -656,23 +773,16 @@
             
             if (data.error) {
                 let msg = data.error.message;
-                // Add friendly advice if model not found
                 if(data.error.code === 404 || msg.includes("not found")) {
-                    msg += "<br><br><strong>Tip:</strong> Try selecting a different Model from the dropdown above (e.g., 'Gemini 1.5 Flash-001').";
-                }
-                
-                if(data.error.code === 400 && msg.includes("API key not valid")) {
-                    throw new Error("Invalid API Key. Please click 'Clear', then Paste your 'AIza...' key from Google AI Studio.");
+                    msg += "<br><br><strong>Tip:</strong> Try selecting a different Model.";
                 }
                 throw new Error(msg);
             }
 
             const aiText = data.candidates[0].content.parts[0].text;
             
-            // Render Markdown
             output.innerHTML = marked.parse(aiText);
 
-            // Extract JSON for Auto-Fill
             const jsonMatch = aiText.match(/```json\s*(\{[\s\S]*?\})\s*```/);
             if (jsonMatch && jsonMatch[1]) {
                 foundSetup = JSON.parse(jsonMatch[1]);
@@ -692,7 +802,6 @@
             if(foundSetup.sl) document.getElementById('sl').value = foundSetup.sl;
             if(foundSetup.tp) document.getElementById('tp').value = foundSetup.tp;
             saveAndCalc();
-            // Scroll to calculator
             document.querySelector('.calculator-panel').scrollIntoView({behavior: 'smooth'});
         }
     }
@@ -701,10 +810,11 @@
     if (localStorage.getItem('gemini_key')) {
         document.getElementById('apiKey').value = localStorage.getItem('gemini_key');
     }
-    
-    // NEW: Load saved model
     if (localStorage.getItem('gemini_model')) {
         document.getElementById('modelSelect').value = localStorage.getItem('gemini_model');
+    }
+    if (localStorage.getItem('gemini_style')) {
+        document.getElementById('styleSelect').value = localStorage.getItem('gemini_style');
     }
 
     if (localStorage.getItem('univ_bal')) document.getElementById('balance').value = localStorage.getItem('univ_bal');
@@ -715,7 +825,6 @@
     if (localStorage.getItem('univ_sl')) document.getElementById('sl').value = localStorage.getItem('univ_sl');
     if (localStorage.getItem('univ_tp')) document.getElementById('tp').value = localStorage.getItem('univ_tp');
     
-    // Logic for Asset Select
     const savedType = localStorage.getItem('univ_asset');
     if (savedType === 'CUSTOM') {
         document.getElementById('customSpecs').style.display = 'block';
