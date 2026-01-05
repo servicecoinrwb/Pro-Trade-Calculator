@@ -143,7 +143,7 @@
         .line-tp { border-color: var(--line-tp); z-index: 5; }
         .line-tp .line-label { background: var(--line-tp); }
 
-        /* NEW ZONE STYLES */
+        /* ZONE STYLES */
         .zone {
             position: absolute;
             left: 0;
@@ -163,7 +163,7 @@
             border-color: var(--accent-purple);
         }
 
-        /* --- NEW: GUIDE PANEL --- */
+        /* --- GUIDE PANEL --- */
         .guide-panel {
             flex: 1;
             min-width: 300px;
@@ -234,6 +234,20 @@
             cursor: pointer;
             display: none;
         }
+
+        .btn-save {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-save:hover { background: #444; border-color: #888; }
 
         .ai-output {
             margin-top: 15px;
@@ -310,6 +324,29 @@
             text-transform: uppercase;
         }
 
+        /* JOURNAL STYLES */
+        .journal-panel {
+            width: 100%;
+            max-width: 100%;
+            margin-top: 20px;
+        }
+        .journal-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+        .journal-table th { text-align: left; color: #888; font-size: 0.75rem; border-bottom: 1px solid #444; padding: 10px; text-transform: uppercase;}
+        .journal-table td { padding: 12px 10px; border-bottom: 1px solid #333; color: #ddd; }
+        .journal-table tr:hover { background: #252525; }
+        
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .badge-long { background: rgba(0, 230, 118, 0.2); color: #00e676; }
+        .badge-short { background: rgba(255, 23, 68, 0.2); color: #ff1744; }
+        
+        .btn-delete { background: none; border: none; color: #666; cursor: pointer; }
+        .btn-delete:hover { color: var(--accent-red); }
+
     </style>
 </head>
 <body>
@@ -383,6 +420,8 @@
                 <span id="profitDisplay" style="color:var(--accent-blue);">Profit: $0.00</span>
             </div>
         </div>
+        
+        <button class="btn-save" onclick="saveTradeToJournal()">💾 Save to Journal</button>
     </div>
 
     <!-- MIDDLE PANEL: VISUAL CHART -->
@@ -561,6 +600,34 @@
 
     </div>
 
+    <!-- NEW: TRADE JOURNAL PANEL -->
+    <div class="journal-panel panel">
+        <h2 style="text-align:left; display:flex; align-items:center; gap:10px;">
+            <span>📓 Trade Journal</span>
+            <span style="font-size:0.7rem; color:#666; font-weight:normal;">(Stored Locally)</span>
+            <button onclick="clearJournal()" style="margin-left:auto; font-size:0.7rem; background:none; border:none; color:#666; cursor:pointer;">Clear All</button>
+        </h2>
+        <table class="journal-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Asset</th>
+                    <th>Type</th>
+                    <th>Entry</th>
+                    <th>SL</th>
+                    <th>TP</th>
+                    <th>Lots</th>
+                    <th>Risk</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="journalBody">
+                <!-- Journal Items -->
+            </tbody>
+        </table>
+        <div id="emptyMsg" style="text-align:center; padding:20px; color:#444; font-style:italic;">No trades saved yet.</div>
+    </div>
+
 </div>
 
 <script>
@@ -682,13 +749,9 @@
         }
 
         // --- ZONES LOGIC ---
-        // Calculate Top positions (Higher price = smaller % top)
         const posEntry = getPos(entry);
         const posSL = getPos(sl);
         
-        // Risk Zone (Between Entry and SL)
-        // Use Math.min because 'top' is distance from top of container. 
-        // The one closer to top (smaller val) should be the start.
         const topRisk = Math.min(posEntry, posSL);
         const heightRisk = Math.abs(posEntry - posSL);
         
@@ -696,7 +759,6 @@
         riskZone.style.top = topRisk + "%";
         riskZone.style.height = heightRisk + "%";
 
-        // Reward Zone (Between Entry and TP)
         if (tp) {
             const posTP = getPos(tp);
             const topReward = Math.min(posEntry, posTP);
@@ -709,7 +771,6 @@
             rewardZone.style.display = 'none';
         }
 
-        // --- LINES LOGIC ---
         lineEntry.style.display = 'flex';
         lineEntry.style.top = posEntry + "%";
         lineEntry.querySelector('.line-label').innerText = "ENTRY " + entry;
@@ -760,19 +821,14 @@
     function saveStyle() {
         const style = document.getElementById('styleSelect').value;
         localStorage.setItem('gemini_style', style);
-        updateGuide(style); // Update the guide panel immediately
+        updateGuide(style); 
     }
     
-    // NEW: Update Guide Panel based on Selection
     function updateGuide(style) {
-        // Hide all
         document.querySelectorAll('.strategy-guide').forEach(el => el.style.display = 'none');
-        
-        // Show selected
         const selectedGuide = document.getElementById(`guide-${style}`);
         if (selectedGuide) selectedGuide.style.display = 'block';
 
-        // Update subtitle
         const titles = {
             'contrarian': 'Contrarian Strategy Rules',
             'trend': 'Trend Following Rules',
@@ -828,7 +884,6 @@
         btnApply.style.display = 'none';
 
         try {
-            // --- DYNAMIC PROMPTS BASED ON PERSONA ---
             let personaInstructions = "";
 
             if (styleId === 'contrarian') {
@@ -925,6 +980,89 @@
         }
     }
 
+    /* =========================================
+       JOURNAL LOGIC
+       ========================================= */
+    function saveTradeToJournal() {
+        const entry = parseFloat(document.getElementById('entry').value);
+        const sl = parseFloat(document.getElementById('sl').value);
+        const tp = parseFloat(document.getElementById('tp').value);
+        const lots = document.getElementById('lotResult').innerText;
+        const risk = document.getElementById('riskDisplay').innerText;
+        const asset = document.getElementById('assetSelect').value;
+
+        if (!entry || !sl || lots === "0.00") {
+            alert("Please calculate a valid trade first.");
+            return;
+        }
+
+        const type = sl < entry ? "LONG" : "SHORT";
+        
+        const trade = {
+            id: Date.now(),
+            date: new Date().toLocaleString(),
+            asset: asset,
+            type: type,
+            entry: entry,
+            sl: sl,
+            tp: tp || "-",
+            lots: lots,
+            risk: risk
+        };
+
+        const journal = JSON.parse(localStorage.getItem('trade_journal') || "[]");
+        journal.unshift(trade); // Add to top
+        localStorage.setItem('trade_journal', JSON.stringify(journal));
+        
+        renderJournal();
+    }
+
+    function renderJournal() {
+        const journal = JSON.parse(localStorage.getItem('trade_journal') || "[]");
+        const tbody = document.getElementById('journalBody');
+        const emptyMsg = document.getElementById('emptyMsg');
+
+        tbody.innerHTML = "";
+        
+        if (journal.length === 0) {
+            emptyMsg.style.display = 'block';
+            return;
+        }
+        emptyMsg.style.display = 'none';
+
+        journal.forEach(t => {
+            const badgeClass = t.type === 'LONG' ? 'badge-long' : 'badge-short';
+            const row = `
+                <tr>
+                    <td>${t.date}</td>
+                    <td>${t.asset}</td>
+                    <td><span class="badge ${badgeClass}">${t.type}</span></td>
+                    <td>${t.entry}</td>
+                    <td>${t.sl}</td>
+                    <td>${t.tp}</td>
+                    <td style="color:var(--accent-green); font-weight:bold;">${t.lots}</td>
+                    <td>${t.risk}</td>
+                    <td><button class="btn-delete" onclick="deleteTrade(${t.id})">🗑️</button></td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function deleteTrade(id) {
+        if(!confirm("Delete this entry?")) return;
+        let journal = JSON.parse(localStorage.getItem('trade_journal') || "[]");
+        journal = journal.filter(t => t.id !== id);
+        localStorage.setItem('trade_journal', JSON.stringify(journal));
+        renderJournal();
+    }
+    
+    function clearJournal() {
+        if(!confirm("Clear entire journal history?")) return;
+        localStorage.setItem('trade_journal', "[]");
+        renderJournal();
+    }
+
     // --- INIT ---
     if (localStorage.getItem('gemini_key')) {
         document.getElementById('apiKey').value = localStorage.getItem('gemini_key');
@@ -933,7 +1071,6 @@
         document.getElementById('modelSelect').value = localStorage.getItem('gemini_model');
     }
     
-    // Load Style and Update Guide
     if (localStorage.getItem('gemini_style')) {
         const savedStyle = localStorage.getItem('gemini_style');
         document.getElementById('styleSelect').value = savedStyle;
@@ -966,6 +1103,7 @@
     if (savedType) document.getElementById('assetSelect').value = savedType;
 
     calc();
+    renderJournal(); // Load journal on startup
 
 </script>
 
