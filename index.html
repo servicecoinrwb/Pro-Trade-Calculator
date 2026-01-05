@@ -143,6 +143,18 @@
         .line-tp { border-color: var(--line-tp); z-index: 5; }
         .line-tp .line-label { background: var(--line-tp); }
 
+        /* NEW ZONE STYLES */
+        .zone {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            opacity: 0.15;
+            transition: all 0.3s ease-out;
+            pointer-events: none;
+        }
+        .risk-zone { background-color: var(--accent-red); border: 1px solid var(--accent-red); }
+        .reward-zone { background-color: var(--accent-green); border: 1px solid var(--accent-green); }
+
         /* --- RIGHT: AI ANALYST --- */
         .ai-panel {
             flex: 1;
@@ -380,6 +392,9 @@
             <span id="ratioDisplay" style="color:var(--accent-green);">R:R --</span>
         </div>
         <div class="chart-area" id="chartArea">
+            <div id="riskZone" class="zone risk-zone" style="display:none;"></div>
+            <div id="rewardZone" class="zone reward-zone" style="display:none;"></div>
+            
             <div id="lineEntry" class="trade-line line-entry" style="display:none;"><div class="line-label">ENTRY</div></div>
             <div id="lineSL" class="trade-line line-sl" style="display:none;"><div class="line-label">SL</div></div>
             <div id="lineTP" class="trade-line line-tp" style="display:none;"><div class="line-label">TP</div></div>
@@ -636,11 +651,15 @@
         const lineEntry = document.getElementById('lineEntry');
         const lineSL = document.getElementById('lineSL');
         const lineTP = document.getElementById('lineTP');
+        const riskZone = document.getElementById('riskZone');
+        const rewardZone = document.getElementById('rewardZone');
 
         if (!entry || !sl) {
             lineEntry.style.display = 'none';
             lineSL.style.display = 'none';
             lineTP.style.display = 'none';
+            riskZone.style.display = 'none';
+            rewardZone.style.display = 'none';
             return;
         }
 
@@ -662,12 +681,41 @@
             return 100 - ((price - chartMin) / chartRange * 100);
         }
 
+        // --- ZONES LOGIC ---
+        // Calculate Top positions (Higher price = smaller % top)
+        const posEntry = getPos(entry);
+        const posSL = getPos(sl);
+        
+        // Risk Zone (Between Entry and SL)
+        // Use Math.min because 'top' is distance from top of container. 
+        // The one closer to top (smaller val) should be the start.
+        const topRisk = Math.min(posEntry, posSL);
+        const heightRisk = Math.abs(posEntry - posSL);
+        
+        riskZone.style.display = 'block';
+        riskZone.style.top = topRisk + "%";
+        riskZone.style.height = heightRisk + "%";
+
+        // Reward Zone (Between Entry and TP)
+        if (tp) {
+            const posTP = getPos(tp);
+            const topReward = Math.min(posEntry, posTP);
+            const heightReward = Math.abs(posEntry - posTP);
+            
+            rewardZone.style.display = 'block';
+            rewardZone.style.top = topReward + "%";
+            rewardZone.style.height = heightReward + "%";
+        } else {
+            rewardZone.style.display = 'none';
+        }
+
+        // --- LINES LOGIC ---
         lineEntry.style.display = 'flex';
-        lineEntry.style.top = getPos(entry) + "%";
+        lineEntry.style.top = posEntry + "%";
         lineEntry.querySelector('.line-label').innerText = "ENTRY " + entry;
 
         lineSL.style.display = 'flex';
-        lineSL.style.top = getPos(sl) + "%";
+        lineSL.style.top = posSL + "%";
         lineSL.querySelector('.line-label').innerText = "SL " + sl;
 
         if (tp) {
