@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,12 +14,9 @@
             --accent-blue: #2979ff;
             --accent-green: #00e676;
             --accent-red: #ff1744;
-            --line-entry: #28a745;
-            /* MT4 Green */
-            --line-sl: #dc3545;
-            /* MT4 Red */
-            --line-tp: #007bff;
-            /* MT4 Blue */
+            --line-entry: #28a745; /* MT4 Green */
+            --line-sl: #dc3545;    /* MT4 Red */
+            --line-tp: #007bff;    /* MT4 Blue */
         }
 
         body {
@@ -50,61 +46,18 @@
             background-color: var(--panel-bg);
             padding: 25px;
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
             border: 1px solid #333;
         }
 
-        h2 {
-            margin: 0 0 5px 0;
-            text-align: center;
-            font-size: 1.2rem;
-        }
+        h2 { margin: 0 0 5px 0; text-align: center; font-size: 1.2rem; }
+        .subtitle { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; }
 
-        .subtitle {
-            text-align: center;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        select,
-        input {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--input-bg);
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: white;
-            font-size: 0.95rem;
-            box-sizing: border-box;
-            outline: none;
-            transition: 0.2s;
-        }
-
-        select:focus,
-        input:focus {
-            border-color: var(--accent-blue);
-            background-color: #333;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 5px; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+        select, input { width: 100%; padding: 12px; background-color: var(--input-bg); border: 1px solid #333; border-radius: 8px; color: white; font-size: 0.95rem; box-sizing: border-box; outline: none; transition: 0.2s; }
+        select:focus, input:focus { border-color: var(--accent-blue); background-color: #333; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
         /* --- RIGHT PANEL: VISUAL CHART --- */
         .chart-panel {
@@ -131,9 +84,8 @@
 
         .chart-area {
             flex: 1;
-            background: #181818;
-            /* Dark Chart Background */
-            background-image:
+            background: #181818; /* Dark Chart Background */
+            background-image: 
                 linear-gradient(#222 1px, transparent 1px),
                 linear-gradient(90deg, #222 1px, transparent 1px);
             background-size: 20px 20px;
@@ -152,7 +104,7 @@
             display: flex;
             align-items: center;
         }
-
+        
         .line-label {
             position: absolute;
             right: 10px;
@@ -164,32 +116,14 @@
             top: -12px;
         }
 
-        .line-entry {
-            border-color: var(--line-entry);
-            z-index: 10;
-        }
+        .line-entry { border-color: var(--line-entry); z-index: 10; }
+        .line-entry .line-label { background: var(--line-entry); }
 
-        .line-entry .line-label {
-            background: var(--line-entry);
-        }
+        .line-sl { border-color: var(--line-sl); z-index: 5; }
+        .line-sl .line-label { background: var(--line-sl); }
 
-        .line-sl {
-            border-color: var(--line-sl);
-            z-index: 5;
-        }
-
-        .line-sl .line-label {
-            background: var(--line-sl);
-        }
-
-        .line-tp {
-            border-color: var(--line-tp);
-            z-index: 5;
-        }
-
-        .line-tp .line-label {
-            background: var(--line-tp);
-        }
+        .line-tp { border-color: var(--line-tp); z-index: 5; }
+        .line-tp .line-label { background: var(--line-tp); }
 
         /* Result Box inside Calculator */
         .result-box {
@@ -200,19 +134,8 @@
             margin-top: 20px;
             border: 1px solid #444;
         }
-
-        .lot-display {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--accent-green);
-            margin: 5px 0;
-        }
-
-        .error-msg {
-            color: var(--accent-red);
-            font-size: 0.8rem;
-            height: 1.2em;
-        }
+        .lot-display { font-size: 2.5rem; font-weight: 800; color: var(--accent-green); margin: 5px 0; }
+        .error-msg { color: var(--accent-red); font-size: 0.8rem; height: 1.2em; }
 
         .profit-stats {
             display: flex;
@@ -223,258 +146,286 @@
             padding-top: 10px;
             border-top: 1px dashed #444;
         }
+
     </style>
 </head>
-
 <body>
 
-    <div class="container">
+<div class="container">
+    
+    <div class="calculator-panel">
+        <h2>Pro Trade Calculator</h2>
+        <div class="subtitle">Enter your setup</div>
 
-        <div class="calculator-panel">
-            <h2>Pro Trade Calculator</h2>
-            <div class="subtitle">Enter your setup</div>
+        <div class="form-group">
+            <label>Asset Class</label>
+            <select id="assetSelect" onchange="loadPreset()">
+                <option value="BTC">BTCUSD (Bitcoin)</option>
+                <option value="US30">US30 (Dow Jones)</option>
+                <option value="FOREX">Forex (EURUSD/GBPUSD)</option>
+                <option value="JPY">Forex JPY (USDJPY)</option>
+                <option value="GOLD">XAUUSD (Gold)</option>
+                <option value="WTI">WTI (Oil)</option>
+                <option value="CUSTOM">Custom Specs</option>
+            </select>
+        </div>
 
+        <div class="grid-2">
             <div class="form-group">
-                <label>Asset Class</label>
-                <select id="assetSelect" onchange="loadPreset()">
-                    <option value="BTC">BTCUSD (Bitcoin)</option>
-                    <option value="US30">US30 (Dow Jones)</option>
-                    <option value="FOREX">Forex (EURUSD/GBPUSD)</option>
-                    <option value="JPY">Forex JPY (USDJPY)</option>
-                    <option value="GOLD">XAUUSD (Gold)</option>
-                    <option value="WTI">WTI (Oil)</option>
-                    <option value="CUSTOM">Custom Specs</option>
-                </select>
+                <label>Balance ($)</label>
+                <input type="number" id="balance" placeholder="490" oninput="saveAndCalc()">
             </div>
-
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Balance ($)</label>
-                    <input type="number" id="balance" placeholder="490" oninput="saveAndCalc()">
-                </div>
-                <div class="form-group">
-                    <label>Risk (%)</label>
-                    <input type="number" id="risk" value="1.0" step="0.1" oninput="saveAndCalc()">
-                </div>
-            </div>
-
             <div class="form-group">
-                <label>Fees / Commission ($)</label>
-                <input type="number" id="fees" value="0" placeholder="Optional" oninput="calc()">
+                <label>Risk (%)</label>
+                <input type="number" id="risk" value="1.0" step="0.1" oninput="saveAndCalc()">
             </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Fees / Commission ($)</label>
+            <input type="number" id="fees" value="0" placeholder="Optional" oninput="saveAndCalc()">
+        </div>
 
-            <div class="grid-2">
-                <div class="form-group">
-                    <label style="color:var(--line-entry);">Entry Price</label>
-                    <input type="number" id="entry" placeholder="Entry" step="any" oninput="calc()">
-                </div>
-                <div class="form-group">
-                    <label style="color:var(--line-sl);">Stop Loss</label>
-                    <input type="number" id="sl" placeholder="SL" step="any" oninput="calc()">
-                </div>
-            </div>
-
+        <div class="grid-2">
             <div class="form-group">
-                <label style="color:var(--line-tp);">Take Profit (Optional)</label>
-                <input type="number" id="tp" placeholder="TP" step="any" oninput="calc()">
+                <label style="color:var(--line-entry);">Entry Price</label>
+                <input type="number" id="entry" placeholder="Entry" step="any" oninput="saveAndCalc()">
             </div>
-
-            <div id="customSpecs"
-                style="display:none; margin-bottom:10px; background:#222; padding:10px; border-radius:6px;">
-                <div class="grid-2">
-                    <input type="number" id="tickSize" placeholder="Tick Size" oninput="calc()">
-                    <input type="number" id="tickValue" placeholder="Tick Val" oninput="calc()">
-                </div>
-            </div>
-
-            <div class="result-box">
-                <div style="font-size:0.7rem; color:#888;">POSITION SIZE (LOTS)</div>
-                <div class="lot-display" id="lotResult">0.00</div>
-                <div class="error-msg" id="errorMsg"></div>
-
-                <div class="profit-stats">
-                    <span id="riskDisplay">Risk: $0.00</span>
-                    <span id="profitDisplay" style="color:var(--accent-blue);">Profit: $0.00</span>
-                </div>
+            <div class="form-group">
+                <label style="color:var(--line-sl);">Stop Loss</label>
+                <input type="number" id="sl" placeholder="SL" step="any" oninput="saveAndCalc()">
             </div>
         </div>
 
-        <div class="chart-panel">
-            <div class="chart-header">
-                <span>Trade Preview</span>
-                <span id="ratioDisplay" style="color:var(--accent-green);">R:R --</span>
-            </div>
-            <div class="chart-area" id="chartArea">
-                <div id="lineEntry" class="trade-line line-entry" style="display:none;">
-                    <div class="line-label">ENTRY</div>
-                </div>
-                <div id="lineSL" class="trade-line line-sl" style="display:none;">
-                    <div class="line-label">SL</div>
-                </div>
-                <div id="lineTP" class="trade-line line-tp" style="display:none;">
-                    <div class="line-label">TP</div>
-                </div>
-
-                <div style="position:absolute; bottom:10px; left:10px; color:#444; font-size:0.7rem;">Simulated Chart
-                    View</div>
+        <div class="form-group">
+            <label style="color:var(--line-tp);">Take Profit (Optional)</label>
+            <input type="number" id="tp" placeholder="TP" step="any" oninput="saveAndCalc()">
+        </div>
+        
+        <div id="customSpecs" style="display:none; margin-bottom:10px; background:#222; padding:10px; border-radius:6px;">
+            <div class="grid-2">
+                <input type="number" id="tickSize" placeholder="Tick Size" oninput="saveAndCalc()">
+                <input type="number" id="tickValue" placeholder="Tick Val" oninput="saveAndCalc()">
             </div>
         </div>
 
+        <div class="result-box">
+            <div style="font-size:0.7rem; color:#888;">POSITION SIZE (LOTS)</div>
+            <div class="lot-display" id="lotResult">0.00</div>
+            <div class="error-msg" id="errorMsg"></div>
+            
+            <div class="profit-stats">
+                <span id="riskDisplay">Risk: $0.00</span>
+                <span id="profitDisplay" style="color:var(--accent-blue);">Profit: $0.00</span>
+            </div>
+        </div>
     </div>
 
-    <script>
-        const PRESETS = {
-            'BTC': { ts: 0.01, tv: 0.01 },
-            'US30': { ts: 1.0, tv: 5.0 },
-            'FOREX': { ts: 0.00001, tv: 1.0 },
-            'JPY': { ts: 0.001, tv: 0.68 },
-            'GOLD': { ts: 0.01, tv: 1.0 },
-            'WTI': { ts: 0.01, tv: 10.0 },
-            'CUSTOM': { ts: 1, tv: 1 }
-        };
+    <div class="chart-panel">
+        <div class="chart-header">
+            <span>Trade Preview</span>
+            <span id="ratioDisplay" style="color:var(--accent-green);">R:R --</span>
+        </div>
+        <div class="chart-area" id="chartArea">
+            <div id="lineEntry" class="trade-line line-entry" style="display:none;"><div class="line-label">ENTRY</div></div>
+            <div id="lineSL" class="trade-line line-sl" style="display:none;"><div class="line-label">SL</div></div>
+            <div id="lineTP" class="trade-line line-tp" style="display:none;"><div class="line-label">TP</div></div>
+            
+            <div style="position:absolute; bottom:10px; left:10px; color:#444; font-size:0.7rem;">Simulated Chart View</div>
+        </div>
+    </div>
 
-        function loadPreset() {
-            const type = document.getElementById('assetSelect').value;
-            const customDiv = document.getElementById('customSpecs');
+</div>
 
-            if (type === 'CUSTOM') {
-                customDiv.style.display = 'block';
-            } else {
-                customDiv.style.display = 'none';
-                document.getElementById('tickSize').value = PRESETS[type].ts;
-                document.getElementById('tickValue').value = PRESETS[type].tv;
-            }
-            calc();
+<script>
+    const PRESETS = {
+        'BTC':    { ts: 0.01, tv: 0.01 },
+        'US30':   { ts: 1.0,  tv: 5.0 },
+        'FOREX':  { ts: 0.00001, tv: 1.0 },
+        'JPY':    { ts: 0.001, tv: 0.68 },
+        'GOLD':   { ts: 0.01, tv: 1.0 },
+        'WTI':    { ts: 0.01, tv: 10.0 },
+        'CUSTOM': { ts: 1,    tv: 1 }
+    };
+
+    function loadPreset() {
+        const type = document.getElementById('assetSelect').value;
+        const customDiv = document.getElementById('customSpecs');
+        
+        if (type === 'CUSTOM') {
+            customDiv.style.display = 'block';
+        } else {
+            customDiv.style.display = 'none';
+            document.getElementById('tickSize').value = PRESETS[type].ts;
+            document.getElementById('tickValue').value = PRESETS[type].tv;
         }
+        saveAndCalc(); // Auto-save when changing preset
+    }
 
-        function calc() {
-            // 1. Get Values
-            const balance = parseFloat(document.getElementById('balance').value) || 0;
-            const riskPerc = parseFloat(document.getElementById('risk').value) || 0;
-            const fees = parseFloat(document.getElementById('fees').value) || 0;
+    function calc() {
+        // 1. Get Values
+        const balance = parseFloat(document.getElementById('balance').value) || 0;
+        const riskPerc = parseFloat(document.getElementById('risk').value) || 0;
+        const fees = parseFloat(document.getElementById('fees').value) || 0;
+        
+        const entry = parseFloat(document.getElementById('entry').value);
+        const sl = parseFloat(document.getElementById('sl').value);
+        const tp = parseFloat(document.getElementById('tp').value);
+        
+        const tickSize = parseFloat(document.getElementById('tickSize').value);
+        const tickValue = parseFloat(document.getElementById('tickValue').value);
 
-            const entry = parseFloat(document.getElementById('entry').value);
-            const sl = parseFloat(document.getElementById('sl').value);
-            const tp = parseFloat(document.getElementById('tp').value);
+        // 2. Logic
+        let displayLots = "0.00";
+        let riskCash = 0;
+        let profitCash = 0;
+        let rr = 0;
 
-            const tickSize = parseFloat(document.getElementById('tickSize').value);
-            const tickValue = parseFloat(document.getElementById('tickValue').value);
+        const err = document.getElementById('errorMsg');
+        err.innerText = "";
 
-            // 2. Logic
-            let displayLots = "0.00";
-            let riskCash = 0;
-            let profitCash = 0;
-            let rr = 0;
+        if (balance && entry && sl) {
+            let totalRisk = balance * (riskPerc / 100);
+            let netRisk = totalRisk - fees;
+            
+            if (netRisk <= 0) {
+                err.innerText = "Fees exceed risk!";
+            } else {
+                const dist = Math.abs(entry - sl);
+                if (dist > 0) {
+                    const lossPerLot = (dist / tickSize) * tickValue;
+                    let lots = netRisk / lossPerLot;
+                    
+                    if (!isFinite(lots)) lots = 0;
+                    if (lots < 0) lots = 0;
+                    
+                    displayLots = lots < 0.1 ? lots.toFixed(3) : lots.toFixed(2);
+                    riskCash = netRisk;
 
-            const err = document.getElementById('errorMsg');
-            err.innerText = "";
-
-            if (balance && entry && sl) {
-                let totalRisk = balance * (riskPerc / 100);
-                let netRisk = totalRisk - fees;
-
-                if (netRisk <= 0) {
-                    err.innerText = "Fees exceed risk!";
-                } else {
-                    const dist = Math.abs(entry - sl);
-                    if (dist > 0) {
-                        const lossPerLot = (dist / tickSize) * tickValue;
-                        let lots = netRisk / lossPerLot;
-
-                        if (!isFinite(lots)) lots = 0;
-                        if (lots < 0) lots = 0;
-
-                        displayLots = lots < 0.1 ? lots.toFixed(3) : lots.toFixed(2);
-                        riskCash = netRisk;
-
-                        // TP Logic
-                        if (tp) {
-                            const tpDist = Math.abs(entry - tp);
-                            const profitPerLot = (tpDist / tickSize) * tickValue;
-                            profitCash = profitPerLot * parseFloat(displayLots);
-                            rr = profitCash / riskCash;
-                        }
+                    // TP Logic
+                    if (tp) {
+                        const tpDist = Math.abs(entry - tp);
+                        const profitPerLot = (tpDist / tickSize) * tickValue;
+                        profitCash = profitPerLot * parseFloat(displayLots);
+                        rr = profitCash / riskCash;
                     }
                 }
             }
-
-            // 3. Update Text UI
-            document.getElementById('lotResult').innerText = displayLots;
-            document.getElementById('riskDisplay').innerText = `Risk: $${riskCash.toFixed(2)}`;
-            document.getElementById('profitDisplay').innerText = `Profit: $${profitCash.toFixed(2)}`;
-            document.getElementById('ratioDisplay').innerText = tp ? `R:R 1:${rr.toFixed(1)}` : "R:R --";
-
-            // 4. Update Visual Chart
-            drawChart(entry, sl, tp);
         }
 
-        function drawChart(entry, sl, tp) {
-            const lineEntry = document.getElementById('lineEntry');
-            const lineSL = document.getElementById('lineSL');
-            const lineTP = document.getElementById('lineTP');
+        // 3. Update Text UI
+        document.getElementById('lotResult').innerText = displayLots;
+        document.getElementById('riskDisplay').innerText = `Risk: $${riskCash.toFixed(2)}`;
+        document.getElementById('profitDisplay').innerText = `Profit: $${profitCash.toFixed(2)}`;
+        document.getElementById('ratioDisplay').innerText = tp ? `R:R 1:${rr.toFixed(1)}` : "R:R --";
 
-            if (!entry || !sl) {
-                lineEntry.style.display = 'none';
-                lineSL.style.display = 'none';
-                lineTP.style.display = 'none';
-                return;
-            }
+        // 4. Update Visual Chart
+        drawChart(entry, sl, tp);
+    }
 
-            // Determine range to display
-            // We need min and max price of all inputs to scale the chart
-            let prices = [entry, sl];
-            if (tp) prices.push(tp);
+    function drawChart(entry, sl, tp) {
+        const lineEntry = document.getElementById('lineEntry');
+        const lineSL = document.getElementById('lineSL');
+        const lineTP = document.getElementById('lineTP');
 
-            let minP = Math.min(...prices);
-            let maxP = Math.max(...prices);
-
-            // Add 10% padding
-            let range = maxP - minP;
-            if (range === 0) range = entry * 0.01; // prevent zero range
-
-            let pad = range * 0.2;
-            let chartMin = minP - pad;
-            let chartMax = maxP + pad;
-            let chartRange = chartMax - chartMin;
-
-            // Helper to get % position (Top is 0%, Bottom is 100%)
-            function getPos(price) {
-                return 100 - ((price - chartMin) / chartRange * 100);
-            }
-
-            // Set Positions
-            lineEntry.style.display = 'flex';
-            lineEntry.style.top = getPos(entry) + "%";
-            lineEntry.querySelector('.line-label').innerText = "ENTRY " + entry;
-
-            lineSL.style.display = 'flex';
-            lineSL.style.top = getPos(sl) + "%";
-            lineSL.querySelector('.line-label').innerText = "SL " + sl;
-
-            if (tp) {
-                lineTP.style.display = 'flex';
-                lineTP.style.top = getPos(tp) + "%";
-                lineTP.querySelector('.line-label').innerText = "TP " + tp;
-            } else {
-                lineTP.style.display = 'none';
-            }
+        if (!entry || !sl) {
+            lineEntry.style.display = 'none';
+            lineSL.style.display = 'none';
+            lineTP.style.display = 'none';
+            return;
         }
 
-        function saveAndCalc() {
-            localStorage.setItem('univ_bal', document.getElementById('balance').value);
-            localStorage.setItem('univ_risk', document.getElementById('risk').value);
-            calc();
+        // Determine range to display
+        // We need min and max price of all inputs to scale the chart
+        let prices = [entry, sl];
+        if (tp) prices.push(tp);
+
+        let minP = Math.min(...prices);
+        let maxP = Math.max(...prices);
+        
+        // Add 10% padding
+        let range = maxP - minP;
+        if (range === 0) range = entry * 0.01; // prevent zero range
+        
+        let pad = range * 0.2;
+        let chartMin = minP - pad;
+        let chartMax = maxP + pad;
+        let chartRange = chartMax - chartMin;
+
+        // Helper to get % position (Top is 0%, Bottom is 100%)
+        function getPos(price) {
+            return 100 - ((price - chartMin) / chartRange * 100);
         }
 
-        // Init
-        const savedBal = localStorage.getItem('univ_bal');
-        const savedRisk = localStorage.getItem('univ_risk');
-        if (savedBal) document.getElementById('balance').value = savedBal;
-        if (savedRisk) document.getElementById('risk').value = savedRisk;
+        // Set Positions
+        lineEntry.style.display = 'flex';
+        lineEntry.style.top = getPos(entry) + "%";
+        lineEntry.querySelector('.line-label').innerText = "ENTRY " + entry;
+
+        lineSL.style.display = 'flex';
+        lineSL.style.top = getPos(sl) + "%";
+        lineSL.querySelector('.line-label').innerText = "SL " + sl;
+
+        if (tp) {
+            lineTP.style.display = 'flex';
+            lineTP.style.top = getPos(tp) + "%";
+            lineTP.querySelector('.line-label').innerText = "TP " + tp;
+        } else {
+            lineTP.style.display = 'none';
+        }
+    }
+
+    function saveAndCalc() {
+        // SAVE EVERYTHING
+        localStorage.setItem('univ_asset', document.getElementById('assetSelect').value);
+        localStorage.setItem('univ_bal', document.getElementById('balance').value);
+        localStorage.setItem('univ_risk', document.getElementById('risk').value);
+        localStorage.setItem('univ_fees', document.getElementById('fees').value);
+        localStorage.setItem('univ_entry', document.getElementById('entry').value);
+        localStorage.setItem('univ_sl', document.getElementById('sl').value);
+        localStorage.setItem('univ_tp', document.getElementById('tp').value);
+        
+        // Also save tick data in case Custom was used
+        localStorage.setItem('univ_ts', document.getElementById('tickSize').value);
+        localStorage.setItem('univ_tv', document.getElementById('tickValue').value);
+
+        calc();
+    }
+
+    // --- INIT ---
+    // Restore all values from storage
+    if (localStorage.getItem('univ_asset')) document.getElementById('assetSelect').value = localStorage.getItem('univ_asset');
+    if (localStorage.getItem('univ_bal')) document.getElementById('balance').value = localStorage.getItem('univ_bal');
+    if (localStorage.getItem('univ_risk')) document.getElementById('risk').value = localStorage.getItem('univ_risk');
+    if (localStorage.getItem('univ_fees')) document.getElementById('fees').value = localStorage.getItem('univ_fees');
+    
+    if (localStorage.getItem('univ_entry')) document.getElementById('entry').value = localStorage.getItem('univ_entry');
+    if (localStorage.getItem('univ_sl')) document.getElementById('sl').value = localStorage.getItem('univ_sl');
+    if (localStorage.getItem('univ_tp')) document.getElementById('tp').value = localStorage.getItem('univ_tp');
+    
+    // Handle Asset/Tick Logic on load
+    const savedType = localStorage.getItem('univ_asset');
+    const customDiv = document.getElementById('customSpecs');
+    
+    if (savedType === 'CUSTOM') {
+        customDiv.style.display = 'block';
+        if (localStorage.getItem('univ_ts')) document.getElementById('tickSize').value = localStorage.getItem('univ_ts');
+        if (localStorage.getItem('univ_tv')) document.getElementById('tickValue').value = localStorage.getItem('univ_tv');
+    } else if (savedType) {
+        // If it's a standard preset, ensure ticks are correct
+        // (We re-apply them to ensure data integrity)
+        customDiv.style.display = 'none';
+        document.getElementById('tickSize').value = PRESETS[savedType].ts;
+        document.getElementById('tickValue').value = PRESETS[savedType].tv;
+    } else {
+        // First ever load
         loadPreset();
+    }
 
-    </script>
+    // Run first calculation
+    calc();
+
+</script>
 
 </body>
-
 </html>
