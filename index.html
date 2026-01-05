@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trading Desk</title>
+    <title>Trading Desk Pro</title>
     <!-- Import Markdown Parser for AI responses -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -347,6 +347,43 @@
         .btn-delete { background: none; border: none; color: #666; cursor: pointer; }
         .btn-delete:hover { color: var(--accent-red); }
 
+        /* EXECUTION PANEL STYLES */
+        .exec-panel {
+            margin-top: 20px;
+            border-top: 1px solid #444;
+            padding-top: 20px;
+        }
+        .exec-header {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #2979ff;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-exec {
+            background: linear-gradient(90deg, #2979ff, #1565c0);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(41, 121, 255, 0.3);
+        }
+        .btn-exec:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(41, 121, 255, 0.5); }
+        .btn-exec:active { transform: translateY(0); }
+        .exec-status { font-size: 0.75rem; text-align: center; margin-top: 8px; color: #888; }
+        .status-dot { display: inline-block; width: 8px; height: 8px; background: #666; border-radius: 50%; margin-right: 5px; }
+        .status-dot.active { background: #00e676; box-shadow: 0 0 8px #00e676; }
+        .status-dot.error { background: #ff1744; }
+
     </style>
 </head>
 <body>
@@ -421,6 +458,35 @@
             </div>
         </div>
         
+        <!-- MT4 EXECUTION BRIDGE -->
+        <div class="exec-panel">
+            <div class="exec-header">
+                <span>🚀 MT4 Bridge</span>
+                <span id="execDirection" style="font-size:0.75rem; background:#333; padding:2px 6px; border-radius:4px;">NEUTRAL</span>
+            </div>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>MT4 Symbol</label>
+                    <input type="text" id="mt4Symbol" placeholder="e.g. BTCUSD" style="font-weight:bold; color:#2979ff;">
+                </div>
+                <div class="form-group">
+                    <label>Order Type</label>
+                    <select id="execType">
+                        <option value="PENDING">Pending (Limit/Stop)</option>
+                        <option value="MARKET">Instant Execution</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-exec" onclick="executeTrade()">Execute on MT4</button>
+            <div class="exec-status">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Bridge Disconnected</span>
+            </div>
+            <input type="text" id="bridgeUrl" value="http://localhost:5000/trade" style="display:none;">
+        </div>
+
         <button class="btn-save" onclick="saveTradeToJournal()">💾 Save to Journal</button>
     </div>
 
@@ -636,18 +702,19 @@
        CALCULATOR LOGIC
        ========================================= */
     const PRESETS = {
-        'BTC':    { ts: 0.01, tv: 0.01 },
-        'US30':   { ts: 1.0,  tv: 5.0 },
-        'FOREX':  { ts: 0.00001, tv: 1.0 },
-        'JPY':    { ts: 0.001, tv: 0.68 },
-        'GOLD':   { ts: 0.01, tv: 1.0 },
-        'WTI':    { ts: 0.01, tv: 10.0 },
-        'CUSTOM': { ts: 1,    tv: 1 }
+        'BTC':    { ts: 0.01, tv: 0.01, sym: 'BTCUSD' },
+        'US30':   { ts: 1.0,  tv: 5.0,  sym: 'US30' },
+        'FOREX':  { ts: 0.00001, tv: 1.0, sym: 'EURUSD' },
+        'JPY':    { ts: 0.001, tv: 0.68,  sym: 'USDJPY' },
+        'GOLD':   { ts: 0.01, tv: 1.0,   sym: 'XAUUSD' },
+        'WTI':    { ts: 0.01, tv: 10.0,  sym: 'USOIL' },
+        'CUSTOM': { ts: 1,    tv: 1,     sym: '' }
     };
 
     function loadPreset() {
         const type = document.getElementById('assetSelect').value;
         const customDiv = document.getElementById('customSpecs');
+        const mt4Input = document.getElementById('mt4Symbol');
         
         if (type === 'CUSTOM') {
             customDiv.style.display = 'block';
@@ -655,6 +722,7 @@
             customDiv.style.display = 'none';
             document.getElementById('tickSize').value = PRESETS[type].ts;
             document.getElementById('tickValue').value = PRESETS[type].tv;
+            mt4Input.value = PRESETS[type].sym;
         }
         saveAndCalc();
     }
@@ -678,10 +746,23 @@
 
         const err = document.getElementById('errorMsg');
         err.innerText = "";
+        
+        // Direction Detection
+        const dirBadge = document.getElementById('execDirection');
+        let direction = "NEUTRAL";
 
         if (balance && entry && sl) {
             let totalRisk = balance * (riskPerc / 100);
             let netRisk = totalRisk - fees;
+            
+            // Calc Direction
+            if (sl < entry) {
+                direction = "LONG (BUY)";
+                dirBadge.style.color = "#00e676";
+            } else {
+                direction = "SHORT (SELL)";
+                dirBadge.style.color = "#ff1744";
+            }
             
             if (netRisk <= 0) {
                 err.innerText = "Fees exceed risk!";
@@ -706,7 +787,8 @@
                 }
             }
         }
-
+        
+        dirBadge.innerText = direction;
         document.getElementById('lotResult').innerText = displayLots;
         document.getElementById('riskDisplay').innerText = `Risk: $${riskCash.toFixed(2)}`;
         document.getElementById('profitDisplay').innerText = `Profit: $${profitCash.toFixed(2)}`;
@@ -799,7 +881,93 @@
         localStorage.setItem('univ_tp', document.getElementById('tp').value);
         localStorage.setItem('univ_ts', document.getElementById('tickSize').value);
         localStorage.setItem('univ_tv', document.getElementById('tickValue').value);
+        
+        // Save MT4 symbol specifically
+        localStorage.setItem('univ_mt4sym', document.getElementById('mt4Symbol').value);
+        
         calc();
+    }
+    
+    /* =========================================
+       MT4 BRIDGE LOGIC
+       ========================================= */
+    async function executeTrade() {
+        const symbol = document.getElementById('mt4Symbol').value;
+        const volume = parseFloat(document.getElementById('lotResult').innerText);
+        const entry = parseFloat(document.getElementById('entry').value);
+        const sl = parseFloat(document.getElementById('sl').value);
+        const tp = parseFloat(document.getElementById('tp').value) || 0;
+        const bridgeUrl = document.getElementById('bridgeUrl').value;
+        const execType = document.getElementById('execType').value;
+        
+        const statusText = document.getElementById('statusText');
+        const statusDot = document.getElementById('statusDot');
+        
+        if(!symbol || volume <= 0 || !entry || !sl) {
+            alert("Invalid Trade Params. Check Symbol, Lots, Entry, and SL.");
+            return;
+        }
+        
+        // Determine Action
+        const isLong = sl < entry;
+        let action = "";
+        
+        if (execType === 'MARKET') {
+            action = isLong ? "OP_BUY" : "OP_SELL";
+        } else {
+            // Pending Logic (Simplified: We assume if Entry is not market price, it's a Limit/Stop)
+            // But since we don't know market price, we just map it:
+            // For now, let's map direction. The MT4 EA will place the order at the specified price.
+            // If it's a Buy at a price, use OP_BUYLIMIT or OP_BUYSTOP?
+            // Safer to use a generic OP_BUY_PENDING logic in EA or just send BUYLIMIT/STOP if we knew current price.
+            // For this version, we will trust the bridge.
+            action = isLong ? "OP_BUYLIMIT" : "OP_SELLLIMIT"; 
+            // Note: In real trading, you need to know if price is above/below to choose Limit vs Stop.
+            // A smarter EA handles this. For now we default to Limit as it's safer.
+        }
+
+        const payload = {
+            symbol: symbol.toUpperCase(),
+            action: action,
+            volume: volume,
+            price: (execType === 'MARKET') ? 0 : entry, // Send 0 for market execution
+            sl: sl,
+            tp: tp,
+            magic: 888888
+        };
+        
+        statusText.innerText = "Sending to Bridge...";
+        statusDot.className = "status-dot";
+
+        try {
+            const response = await fetch(bridgeUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                statusText.innerText = "Trade Sent Successfully!";
+                statusDot.classList.add('active');
+                
+                // Also save to journal automatically
+                saveTradeToJournal();
+                
+                setTimeout(() => {
+                    statusText.innerText = "Bridge Ready";
+                    statusDot.classList.remove('active');
+                }, 3000);
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            statusText.innerText = "Connection Failed";
+            statusDot.classList.add('error');
+            console.error(error);
+            alert("Failed to connect to Python Bridge.\n\n1. Is bridge.py running?\n2. Is localhost:5000 accessible?\n3. Check console for CORS errors.");
+        }
     }
 
     /* =========================================
@@ -1136,6 +1304,14 @@
     }
     
     if (savedType) document.getElementById('assetSelect').value = savedType;
+    
+    // Load Saved MT4 Symbol if exists, else defaults handled in loadPreset
+    if (localStorage.getItem('univ_mt4sym')) {
+        document.getElementById('mt4Symbol').value = localStorage.getItem('univ_mt4sym');
+    } else {
+        // Force load default if nothing saved
+        if(savedType) document.getElementById('mt4Symbol').value = PRESETS[savedType].sym;
+    }
 
     calc();
     renderJournal(); // Load journal on startup
