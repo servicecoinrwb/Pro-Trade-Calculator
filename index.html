@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Visual Trade Calculator + Smart AI Analyst</title>
+    <title>Trading Desk</title>
     <!-- Import Markdown Parser for AI responses -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -442,55 +442,105 @@
         <div class="ai-output" id="aiOutput" style="display:none;"></div>
     </div>
 
-    <!-- GUIDE PANEL (Focused on your specific Contrarian struggle) -->
+    <!-- GUIDE PANEL (Now Dynamic) -->
     <div class="guide-panel panel">
         <h2 class="guide-header">
             <span style="font-size:1.5rem;">🧠</span> Cheat Sheet
         </h2>
-        <div class="subtitle">Contrarian Strategy Rules</div>
+        <div class="subtitle" id="guideSubtitle">Strategy Rules</div>
 
-        <div class="guide-section">
-            <div class="guide-title">⏰ The Schedule (EST)</div>
-            <table class="schedule-table">
-                <tr>
-                    <td class="time-col">09:30 AM</td>
-                    <td class="action-col action-danger">DO NOT TRADE (Fake moves)</td>
-                </tr>
-                <tr>
-                    <td class="time-col">10:00 AM</td>
-                    <td class="action-col action-highlight">LOOK FOR REVERSAL (SFP)</td>
-                </tr>
-                <tr>
-                    <td class="time-col">12:00 PM</td>
-                    <td class="action-col action-danger">NO TRADE (Lunch Chop)</td>
-                </tr>
-                <tr>
-                    <td class="time-col">02:00 PM</td>
-                    <td class="action-col action-highlight">AFTERNOON REVERSAL</td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="guide-section">
-            <div class="guide-title">📊 Timeframe Rules</div>
-            <div class="rule-box">
-                <strong>❌ 1 MINUTE Chart</strong>
-                Only noise. Creates fake signals. Ignore it.
+        <!-- CONTRARIAN GUIDE -->
+        <div id="guide-contrarian" class="strategy-guide">
+            <div class="guide-section">
+                <div class="guide-title">⏰ The Schedule (EST)</div>
+                <table class="schedule-table">
+                    <tr><td class="time-col">09:30 AM</td><td class="action-col action-danger">DO NOT TRADE (Fakes)</td></tr>
+                    <tr><td class="time-col">10:00 AM</td><td class="action-col action-highlight">REVERSAL (SFP)</td></tr>
+                    <tr><td class="time-col">12:00 PM</td><td class="action-col action-danger">NO TRADE (Chop)</td></tr>
+                    <tr><td class="time-col">02:00 PM</td><td class="action-col action-highlight">AFTERNOON REVERSAL</td></tr>
+                </table>
             </div>
-            <div class="rule-box">
-                <strong>✅ 1 HOUR Chart</strong>
-                Use this to find Key Levels (Highs/Lows).
+            <div class="guide-section">
+                <div class="guide-title">📊 Timeframes</div>
+                <div class="rule-box"><strong>❌ 1 MINUTE:</strong> Only noise. Ignore it.</div>
+                <div class="rule-box"><strong>✅ 1 HOUR:</strong> Key Levels (Highs/Lows).</div>
+                <div class="rule-box"><strong>✅ 15 MINUTE:</strong> ENTRY. Wait for CLOSE.</div>
             </div>
-            <div class="rule-box">
-                <strong>✅ 15 MINUTE Chart</strong>
-                Use this for ENTRY. Wait for candle CLOSE.
+            <div class="guide-section">
+                <div class="guide-title">🛡️ Golden Rule</div>
+                <div style="font-size:0.8rem; color:#ccc;">
+                    "I will not short a breakout until I see a candle <span style="color:var(--accent-orange); font-weight:bold;">try to go higher and FAIL</span>."
+                </div>
             </div>
         </div>
 
-        <div class="guide-section">
-            <div class="guide-title">🛡️ The Golden Rule</div>
-            <div style="font-size:0.8rem; color:#ccc; line-height:1.4;">
-                "I will not short a breakout until I see a candle <span style="color:var(--accent-orange); font-weight:bold;">try to go higher and FAIL (close lower)</span>."
+        <!-- TREND FOLLOWER GUIDE -->
+        <div id="guide-trend" class="strategy-guide" style="display:none;">
+            <div class="guide-section">
+                <div class="guide-title">⏰ The Schedule (EST)</div>
+                <table class="schedule-table">
+                    <tr><td class="time-col">09:45 AM</td><td class="action-col action-highlight">CONTINUATION MOVE</td></tr>
+                    <tr><td class="time-col">11:00 AM</td><td class="action-col">Manage Stops</td></tr>
+                    <tr><td class="time-col">02:30 PM</td><td class="action-col action-highlight">TREND RESUMPTION</td></tr>
+                </table>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">📊 Timeframes</div>
+                <div class="rule-box"><strong>✅ 4 HOUR:</strong> Trend Direction (King).</div>
+                <div class="rule-box"><strong>✅ 15 MINUTE:</strong> Pullback Entry.</div>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">🛡️ Golden Rule</div>
+                <div style="font-size:0.8rem; color:#ccc;">
+                    "Never Short a Higher High. Never Buy a Lower Low. Wait for the <span style="color:var(--accent-orange); font-weight:bold;">Pullback to Support</span>."
+                </div>
+            </div>
+        </div>
+
+        <!-- SMC GUIDE -->
+        <div id="guide-smc" class="strategy-guide" style="display:none;">
+            <div class="guide-section">
+                <div class="guide-title">⏰ The Schedule (EST)</div>
+                <table class="schedule-table">
+                    <tr><td class="time-col">08:30 AM</td><td class="action-col">News Injection</td></tr>
+                    <tr><td class="time-col">09:30 AM</td><td class="action-col action-danger">Judas Swing (Fake)</td></tr>
+                    <tr><td class="time-col">10:00 AM</td><td class="action-col action-highlight">Silver Bullet (Entry)</td></tr>
+                </table>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">📊 Concepts</div>
+                <div class="rule-box"><strong>💧 FVG (Gap):</strong> Entry Target.</div>
+                <div class="rule-box"><strong>🧱 OB (Block):</strong> Defensive Line.</div>
+                <div class="rule-box"><strong>🔁 MSS:</strong> Structure Shift (Confirmation).</div>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">🛡️ Golden Rule</div>
+                <div style="font-size:0.8rem; color:#ccc;">
+                    "Identify the <span style="color:var(--accent-orange); font-weight:bold;">Liquidity</span>. Wait for the run on stops, THEN the shift in structure."
+                </div>
+            </div>
+        </div>
+
+        <!-- BREAKOUT GUIDE -->
+        <div id="guide-breakout" class="strategy-guide" style="display:none;">
+            <div class="guide-section">
+                <div class="guide-title">⏰ The Schedule (EST)</div>
+                <table class="schedule-table">
+                    <tr><td class="time-col">09:30 AM</td><td class="action-col action-highlight">OPENING RANGE BREAK</td></tr>
+                    <tr><td class="time-col">10:30 AM</td><td class="action-col">Europe Close (Vol)</td></tr>
+                </table>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">📊 Requirements</div>
+                <div class="rule-box"><strong>✅ PATTERN:</strong> Tight Wedge/Flag.</div>
+                <div class="rule-box"><strong>✅ VOLUME:</strong> Must Spike on Break.</div>
+                <div class="rule-box"><strong>✅ CLOSE:</strong> Candle must close OUT.</div>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">🛡️ Golden Rule</div>
+                <div style="font-size:0.8rem; color:#ccc;">
+                    "No Volume = Fakeout. If the candle closes back inside the range, <span style="color:var(--accent-red); font-weight:bold;">ABORT IMMEDIATELY</span>."
+                </div>
             </div>
         </div>
 
@@ -660,9 +710,30 @@
     }
 
     function saveStyle() {
-        localStorage.setItem('gemini_style', document.getElementById('styleSelect').value);
+        const style = document.getElementById('styleSelect').value;
+        localStorage.setItem('gemini_style', style);
+        updateGuide(style); // Update the guide panel immediately
     }
     
+    // NEW: Update Guide Panel based on Selection
+    function updateGuide(style) {
+        // Hide all
+        document.querySelectorAll('.strategy-guide').forEach(el => el.style.display = 'none');
+        
+        // Show selected
+        const selectedGuide = document.getElementById(`guide-${style}`);
+        if (selectedGuide) selectedGuide.style.display = 'block';
+
+        // Update subtitle
+        const titles = {
+            'contrarian': 'Contrarian Strategy Rules',
+            'trend': 'Trend Following Rules',
+            'smc': 'Smart Money Concepts (ICT)',
+            'breakout': 'Momentum Breakout Rules'
+        };
+        document.getElementById('guideSubtitle').innerText = titles[style] || 'Strategy Rules';
+    }
+
     function clearApiKey() {
         document.getElementById('apiKey').value = '';
         localStorage.removeItem('gemini_key');
@@ -813,8 +884,14 @@
     if (localStorage.getItem('gemini_model')) {
         document.getElementById('modelSelect').value = localStorage.getItem('gemini_model');
     }
+    
+    // Load Style and Update Guide
     if (localStorage.getItem('gemini_style')) {
-        document.getElementById('styleSelect').value = localStorage.getItem('gemini_style');
+        const savedStyle = localStorage.getItem('gemini_style');
+        document.getElementById('styleSelect').value = savedStyle;
+        updateGuide(savedStyle);
+    } else {
+        updateGuide('contrarian'); // Default
     }
 
     if (localStorage.getItem('univ_bal')) document.getElementById('balance').value = localStorage.getItem('univ_bal');
