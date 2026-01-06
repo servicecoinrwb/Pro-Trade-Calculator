@@ -621,6 +621,7 @@
                     <option value="smc">Smart Money (ICT)</option>
                     <option value="breakout">Breakout</option>
                     <option value="scalper">Scalper (Quick Flips)</option>
+                    <option value="fund_manager">Fund Manager (Institutional)</option>
                 </select>
             </div>
         </div>
@@ -1460,6 +1461,28 @@
                     "Speed is life. If the trade doesn't work immediately, <span style="color:var(--accent-red); font-weight:bold;">GET OUT</span>. Don't turn a scalp into a swing."
                 </div>
             </div>`,
+        'fund_manager': `
+            <div class="guide-section">
+                <div class="guide-title">⏰ The Schedule (EST)</div>
+                <table class="schedule-table">
+                    <tr><td class="time-col">Weekly</td><td class="action-col">Macro & Fundamental Review</td></tr>
+                    <tr><td class="time-col">08:30 AM</td><td class="action-col action-highlight">Economic Data Release</td></tr>
+                    <tr><td class="time-col">11:00 AM</td><td class="action-col">Liquidity Check</td></tr>
+                    <tr><td class="time-col">03:50 PM</td><td class="action-col action-danger">MOC (Market on Close)</td></tr>
+                </table>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">📊 Timeframes</div>
+                <div class="rule-box"><strong>✅ WEEKLY/DAILY:</strong> Directional Bias (The "Why").</div>
+                <div class="rule-box"><strong>✅ 4 HOUR:</strong> Structure & Key Levels.</div>
+                <div class="rule-box"><strong>❌ < 1 HOUR:</strong> Noise. Irrelevant for positioning.</div>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">🛡️ Golden Rule</div>
+                <div style="font-size:0.8rem; color:#ccc;">
+                    "We are not here to gamble; we are here to allocate risk. Capital preservation is #1. <span style="color:var(--accent-green); font-weight:bold;">Wait for the fat pitch</span> where fundamentals align with technicals."
+                </div>
+            </div>`,
         'auto': `
             <div class="guide-section">
                 <div class="guide-title">AI Auto-Analysis</div>
@@ -1475,6 +1498,7 @@
             'smc': 'Smart Money Concepts (ICT)',
             'breakout': 'Momentum Breakout Rules',
             'scalper': 'Scalping Strategy Rules',
+            'fund_manager': 'Institutional Portfolio Rules',
             'auto': 'Auto-Analysis Mode'
         };
         
@@ -1548,6 +1572,7 @@
                     - "smc" (Liquidity/FVG)
                     - "breakout" (Volatility expansion)
                     - "scalper" (Quick momentum/1m timeframe)
+                    - "fund_manager" (Macro/Long-term/Low Risk)
                 ANALYSIS: Analyze the chart using ONLY that selected persona's rules.
             `;
         }
@@ -1596,7 +1621,7 @@
                     // Auto-Switch Logic
                     if (vals.persona && style === 'auto') {
                         const detected = vals.persona.toLowerCase();
-                        const validStyles = ['contrarian', 'trend', 'smc', 'breakout', 'scalper'];
+                        const validStyles = ['contrarian', 'trend', 'smc', 'breakout', 'scalper', 'fund_manager'];
                         
                         if (validStyles.includes(detected)) {
                             // Update Dropdown
