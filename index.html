@@ -1156,13 +1156,27 @@
     async function fetchPrice() {
         // Try to get price from the LOCAL BRIDGE first (Supports ALL Assets)
         const bridgeUrl = document.getElementById('bridgeUrl').value.replace('/trade', '/price');
+        const selectedSym = document.getElementById('mt4Symbol').value.toUpperCase();
+        
         try {
             const res = await fetch(bridgeUrl);
             if(res.ok) {
                 const data = await res.json();
                 if(data.price && data.price > 0) {
-                    document.getElementById('priceSource').innerText = "Source: MT4 Live (" + data.symbol + ")";
-                    document.getElementById('priceSource').style.color = "#00e676";
+                    const bridgeSym = data.symbol.toUpperCase();
+                    
+                    // Check for mismatch (e.g. User selected Gold, but Bridge is sending BTC)
+                    let sourceText = `Source: MT4 Live (${bridgeSym})`;
+                    let color = "#00e676"; // Green
+                    
+                    // Simple partial match check
+                    if (!bridgeSym.includes(selectedSym) && !selectedSym.includes(bridgeSym)) {
+                        sourceText = `⚠️ Mismatch: Chart is ${bridgeSym}`;
+                        color = "#ff9100"; // Orange warning
+                    }
+                    
+                    document.getElementById('priceSource').innerText = sourceText;
+                    document.getElementById('priceSource').style.color = color;
                     return data.price;
                 }
             }
@@ -1173,9 +1187,11 @@
             if(asset === 'BTC') {
                 document.getElementById('priceSource').innerText = "Source: CoinGecko (Delay)";
                 document.getElementById('priceSource').style.color = "#ff9100";
-                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
-                const data = await res.json();
-                return data.bitcoin.usd;
+                try {
+                    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+                    const data = await res.json();
+                    return data.bitcoin.usd;
+                } catch(err) { return null; }
             }
             
             document.getElementById('priceSource').innerText = "Source: Disconnected (Start Bridge!)";
