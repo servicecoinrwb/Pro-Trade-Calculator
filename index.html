@@ -163,23 +163,20 @@
             border-color: var(--accent-purple);
         }
 
-        /* --- GUIDE PANEL --- */
-        .guide-panel {
+        /* --- HELP PANELS (Hidden by default) --- */
+        .help-panel {
             flex: 1;
             min-width: 300px;
             max-width: 350px;
-            border-color: var(--accent-orange);
             background: #1a1a1a;
+            display: none; /* Hidden by default */
         }
-        
-        /* --- CHECKLIST PANEL --- */
-        .checklist-panel {
-            flex: 1;
-            min-width: 300px;
-            max-width: 350px;
-            border-color: #00e676;
-            background: #1a1a1a;
+        .help-panel.active {
+            display: flex;
         }
+
+        .guide-panel { border-color: var(--accent-orange); }
+        .checklist-panel { border-color: #00e676; }
 
         .ai-header { color: var(--accent-purple); display:flex; align-items:center; justify-content: center; gap:8px;}
         .guide-header { color: var(--accent-orange); display:flex; align-items:center; justify-content: center; gap:8px;}
@@ -402,7 +399,10 @@
     
     <!-- LEFT PANEL: CALCULATOR -->
     <div class="calculator-panel panel">
-        <h2>Pro Trade Calculator</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <h2 style="margin:0;">Pro Trade Calculator</h2>
+            <button onclick="toggleHelp()" style="background:none; border:none; cursor:pointer; font-size:1.2rem; color:var(--text-muted);" title="Toggle Help Guides">ℹ️</button>
+        </div>
         <div class="subtitle">Enter your setup</div>
 
         <div class="form-group">
@@ -573,8 +573,8 @@
         <div class="ai-output" id="aiOutput" style="display:none;"></div>
     </div>
 
-    <!-- GUIDE PANEL (Now Dynamic) -->
-    <div class="guide-panel panel">
+    <!-- GUIDE PANEL (Now Hidden by Default) -->
+    <div class="guide-panel panel help-panel" id="guidePanel">
         <h2 class="guide-header">
             <span style="font-size:1.5rem;">🧠</span> Cheat Sheet
         </h2>
@@ -677,8 +677,8 @@
 
     </div>
 
-    <!-- STARTUP CHECKLIST PANEL -->
-    <div class="checklist-panel panel">
+    <!-- STARTUP CHECKLIST PANEL (Now Hidden by Default) -->
+    <div class="checklist-panel panel help-panel" id="checklistPanel">
         <h2 class="checklist-header">
             <span>✅</span> Daily Startup
         </h2>
@@ -763,6 +763,24 @@
         'WTI':    { ts: 0.01, tv: 10.0,  sym: 'USOIL' },
         'CUSTOM': { ts: 1,    tv: 1,     sym: '' }
     };
+
+    // Toggle Help Panels
+    function toggleHelp() {
+        const guide = document.getElementById('guidePanel');
+        const checklist = document.getElementById('checklistPanel');
+        
+        if (guide.style.display === 'flex') {
+            guide.style.display = 'none';
+            checklist.style.display = 'none';
+        } else {
+            guide.style.display = 'flex';
+            checklist.style.display = 'flex';
+            // Scroll to them
+            setTimeout(() => {
+                guide.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+    }
 
     function loadPreset() {
         const type = document.getElementById('assetSelect').value;
