@@ -630,6 +630,7 @@
                     <option value="trend">Trend Follower</option>
                     <option value="smc">Smart Money (ICT)</option>
                     <option value="breakout">Breakout</option>
+                    <option value="scalper">Scalper (Quick Flips)</option>
                 </select>
             </div>
         </div>
@@ -1380,6 +1381,28 @@
                     "No Volume = Fakeout. If the candle closes back inside the range, <span style="color:var(--accent-red); font-weight:bold;">ABORT IMMEDIATELY</span>."
                 </div>
             </div>`,
+        'scalper': `
+            <div class="guide-section">
+                <div class="guide-title">⏰ The Schedule (EST)</div>
+                <table class="schedule-table">
+                    <tr><td class="time-col">09:30 AM</td><td class="action-col action-highlight">Market Open (Vol)</td></tr>
+                    <tr><td class="time-col">09:45 AM</td><td class="action-col">Initial Balance</td></tr>
+                    <tr><td class="time-col">10:00 AM</td><td class="action-col action-highlight">Macro Move</td></tr>
+                    <tr><td class="time-col">11:30 AM</td><td class="action-col action-danger">Slow Down</td></tr>
+                </table>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">📊 Timeframes</div>
+                <div class="rule-box"><strong>✅ 5 MINUTE:</strong> Trend direction.</div>
+                <div class="rule-box"><strong>✅ 1 MINUTE:</strong> Entry triggers.</div>
+                <div class="rule-box"><strong>✅ SECONDS:</strong> Precision (optional).</div>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">🛡️ Golden Rule</div>
+                <div style="font-size:0.8rem; color:#ccc;">
+                    "Speed is life. If the trade doesn't work immediately, <span style="color:var(--accent-red); font-weight:bold;">GET OUT</span>. Don't turn a scalp into a swing."
+                </div>
+            </div>`,
         'auto': `
             <div class="guide-section">
                 <div class="guide-title">AI Auto-Analysis</div>
@@ -1394,6 +1417,7 @@
             'trend': 'Trend Following Rules',
             'smc': 'Smart Money Concepts (ICT)',
             'breakout': 'Momentum Breakout Rules',
+            'scalper': 'Scalping Strategy Rules',
             'auto': 'Auto-Analysis Mode'
         };
         
@@ -1466,6 +1490,7 @@
                     - "trend" (Follow strong moves)
                     - "smc" (Liquidity/FVG)
                     - "breakout" (Volatility expansion)
+                    - "scalper" (Quick momentum/1m timeframe)
                 ANALYSIS: Analyze the chart using ONLY that selected persona's rules.
             `;
         }
@@ -1514,7 +1539,7 @@
                     // Auto-Switch Logic
                     if (vals.persona && style === 'auto') {
                         const detected = vals.persona.toLowerCase();
-                        const validStyles = ['contrarian', 'trend', 'smc', 'breakout'];
+                        const validStyles = ['contrarian', 'trend', 'smc', 'breakout', 'scalper'];
                         
                         if (validStyles.includes(detected)) {
                             // Update Dropdown
