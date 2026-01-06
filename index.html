@@ -836,28 +836,49 @@
         const dirBadge = document.getElementById('execDirection');
         let direction = "NEUTRAL";
 
-        if (balance && entry && sl) {
-            let totalRisk = balance * (riskPerc / 100);
-            let netRisk = totalRisk - fees;
+        if (balance && entry && sl && tickSize && tickValue) { // Added checks for TS/TV
+            let totalRiskAllowance = balance * (riskPerc / 100);
+            // We assume 'fees' is the total roundtrip commission the user expects to pay for this trade.
+            // To stay within Risk Allowance: LossFromPrice + Fees <= TotalRiskAllowance
+            // LossFromPrice <= TotalRiskAllowance - Fees
+            let riskForStopLoss = totalRiskAllowance - fees;
+
             if (sl < entry) { direction = "LONG (BUY)"; dirBadge.style.color = "#00e676"; } 
             else { direction = "SHORT (SELL)"; dirBadge.style.color = "#ff1744"; }
             
-            if (netRisk <= 0) {
+            if (riskForStopLoss <= 0) {
                 err.innerText = "Fees exceed risk!";
             } else {
                 const dist = Math.abs(entry - sl);
                 if (dist > 0) {
+                    // Value of a 1 unit move per lot (Standardized)
+                    // Formula: (Distance / TickSize) * TickValue
                     const lossPerLot = (dist / tickSize) * tickValue;
-                    let lots = netRisk / lossPerLot;
+                    
+                    let lots = riskForStopLoss / lossPerLot;
+                    
                     if (!isFinite(lots)) lots = 0;
                     if (lots < 0) lots = 0;
+                    
+                    // Rounding Logic:
+                    // Use 2 decimals for standard, maybe 3 for small sizes < 0.1
                     displayLots = lots < 0.1 ? lots.toFixed(3) : lots.toFixed(2);
-                    riskCash = netRisk;
+                    const actualLots = parseFloat(displayLots);
+
+                    // Recalculate Actual Metrics based on the rounded lots
+                    // Actual Risk = (PriceLoss) + Fees
+                    riskCash = (actualLots * lossPerLot) + fees;
+                    
                     if (tp) {
                         const tpDist = Math.abs(entry - tp);
                         const profitPerLot = (tpDist / tickSize) * tickValue;
-                        profitCash = profitPerLot * parseFloat(displayLots);
-                        rr = profitCash / riskCash;
+                        // Actual Profit = (PriceGain) - Fees
+                        profitCash = (actualLots * profitPerLot) - fees;
+                        
+                        // RR = Net Profit / Net Risk
+                        if (riskCash > 0) {
+                            rr = profitCash / riskCash;
+                        }
                     }
                 }
             }
@@ -866,7 +887,14 @@
         document.getElementById('lotResult').innerText = displayLots;
         document.getElementById('riskDisplay').innerText = `Risk: $${riskCash.toFixed(2)}`;
         document.getElementById('profitDisplay').innerText = `Profit: $${profitCash.toFixed(2)}`;
-        document.getElementById('ratioDisplay').innerText = tp ? `R:R 1:${rr.toFixed(1)}` : "R:R --";
+        
+        // Format R:R
+        let rrText = "R:R --";
+        if (tp && rr !== 0) {
+            rrText = `R:R 1:${rr.toFixed(2)}`;
+        }
+        document.getElementById('ratioDisplay').innerText = rrText;
+        
         drawChart(entry, sl, tp);
     }
 
