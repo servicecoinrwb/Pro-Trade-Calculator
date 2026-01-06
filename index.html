@@ -171,9 +171,19 @@
             border-color: var(--accent-orange);
             background: #1a1a1a;
         }
+        
+        /* --- CHECKLIST PANEL --- */
+        .checklist-panel {
+            flex: 1;
+            min-width: 300px;
+            max-width: 350px;
+            border-color: #00e676;
+            background: #1a1a1a;
+        }
 
         .ai-header { color: var(--accent-purple); display:flex; align-items:center; justify-content: center; gap:8px;}
         .guide-header { color: var(--accent-orange); display:flex; align-items:center; justify-content: center; gap:8px;}
+        .checklist-header { color: #00e676; display:flex; align-items:center; justify-content: center; gap:8px;}
         
         .drop-zone {
             border: 2px dashed #444;
@@ -665,6 +675,39 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- STARTUP CHECKLIST PANEL -->
+    <div class="checklist-panel panel">
+        <h2 class="checklist-header">
+            <span>✅</span> Daily Startup
+        </h2>
+        <div class="subtitle">System Check</div>
+        
+        <div style="font-size:0.85rem; line-height:1.5; color:#ccc;">
+            <div style="margin-bottom:12px;">
+                <strong style="color:white; display:block; margin-bottom:2px;">1. Open MetaTrader 4</strong>
+                Ensure it's connected and <span style="color:#00e676; font-weight:bold;">AutoTrading</span> button is Green.
+            </div>
+            <div style="margin-bottom:12px;">
+                <strong style="color:white; display:block; margin-bottom:2px;">2. Check the Graph</strong>
+                Look for the <span style="color:#2979ff; font-weight:bold;">TradeListener smiley :)</span> in the top right corner.
+            </div>
+            <div style="margin-bottom:12px;">
+                <strong style="color:white; display:block; margin-bottom:2px;">3. Start the Bridge</strong>
+                Run <code>python bridge.py</code> in your folder.<br>
+                <span style="color:#ff1744; font-weight:bold;">CRITICAL:</span> Keep that black window <strong>OPEN</strong>.
+            </div>
+            <div style="margin-bottom:12px;">
+                <strong style="color:white; display:block; margin-bottom:2px;">4. Open this Tool</strong>
+                Double-click this HTML file to start.
+            </div>
+            
+            <div style="background:#2c2c2c; padding:10px; border-radius:6px; margin-top:20px; border-left:3px solid #ff9100; font-size:0.8rem;">
+                <strong>⚡ Power Tip:</strong>
+                Set your computer to <u>"Never Sleep"</u>. If the PC sleeps, the bridge and MT4 will stop running!
+            </div>
+        </div>
     </div>
 
     <!-- NEW: TRADE JOURNAL PANEL -->
