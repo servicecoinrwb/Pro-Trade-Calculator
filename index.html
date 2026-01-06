@@ -1455,14 +1455,30 @@
         const model = document.getElementById('modelSelect').value;
         const style = document.getElementById('styleSelect').value;
         
+        let personaInstructions = `You are a professional trader (${style} style).`;
+        
+        if (style === 'auto') {
+            personaInstructions = `
+                ROLE: Master Trading Strategist.
+                TASK: First, determine the market condition (Trending, Ranging, Reversal).
+                DECISION: Select the single best trading persona for this specific chart from:
+                    - "contrarian" (Fade extremes/SFP)
+                    - "trend" (Follow strong moves)
+                    - "smc" (Liquidity/FVG)
+                    - "breakout" (Volatility expansion)
+                ANALYSIS: Analyze the chart using ONLY that selected persona's rules.
+            `;
+        }
+
         const promptText = `
-            You are a professional trader (${style} style). 
+            ${personaInstructions}
             Analyze this chart image. 
             1. Identify Market Structure.
             2. Suggest a trade setup if valid (Long/Short).
             3. Provide specific Entry, Stop Loss, and Take Profit levels based on the visual data.
             4. Format response in Markdown.
-            5. END the response with a JSON block: {"entry": number, "sl": number, "tp": number}
+            5. END the response with a JSON block: {"entry": number, "sl": number, "tp": number, "persona": "style_name"}
+               (If not in auto mode, set persona to "${style}").
         `;
 
         try {
@@ -1489,17 +1505,41 @@
             // Render Markdown
             output.innerHTML = marked.parse(text);
             
-            // Extract JSON for buttons
+            // Extract JSON for buttons and auto-switch
             const jsonMatch = text.match(/\{[\s\S]*"entry"[\s\S]*\}/);
             if (jsonMatch) {
-                const vals = JSON.parse(jsonMatch[0]);
-                document.getElementById('btnApply').style.display = 'block';
-                document.getElementById('btnApply').onclick = function() {
-                    document.getElementById('entry').value = vals.entry;
-                    document.getElementById('sl').value = vals.sl;
-                    document.getElementById('tp').value = vals.tp;
-                    saveAndCalc();
-                };
+                try {
+                    const vals = JSON.parse(jsonMatch[0]);
+                    
+                    // Auto-Switch Logic
+                    if (vals.persona && style === 'auto') {
+                        const detected = vals.persona.toLowerCase();
+                        const validStyles = ['contrarian', 'trend', 'smc', 'breakout'];
+                        
+                        if (validStyles.includes(detected)) {
+                            // Update Dropdown
+                            document.getElementById('styleSelect').value = detected;
+                            saveStyle(); // Updates the Guide/Cheat Sheet
+                            
+                            // Visual Notification
+                            const notif = `<div style="background:#252525; border-left:3px solid #00e676; padding:10px; margin-bottom:15px; border-radius:4px; font-size:0.85rem;">
+                                ✨ <strong>Auto-Detected:</strong> Switched to ${detected.toUpperCase()} strategy.
+                            </div>`;
+                            output.innerHTML = notif + output.innerHTML;
+                        }
+                    }
+
+                    document.getElementById('btnApply').style.display = 'block';
+                    document.getElementById('btnApply').onclick = function() {
+                        if(vals.entry) document.getElementById('entry').value = vals.entry;
+                        if(vals.sl) document.getElementById('sl').value = vals.sl;
+                        if(vals.tp) document.getElementById('tp').value = vals.tp;
+                        saveAndCalc();
+                        document.querySelector('.calculator-panel').scrollIntoView({ behavior: 'smooth' });
+                    };
+                } catch (e) {
+                    console.error("JSON parsing error", e);
+                }
             }
 
         } catch (e) {
