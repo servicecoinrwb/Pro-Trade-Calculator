@@ -690,17 +690,10 @@
 
     <!-- GUIDE PANEL (Hidden) -->
     <div class="guide-panel panel help-panel" id="guidePanel">
-        <h2 class="guide-header"><span style="font-size:1.5rem;">🧠</span> Cheat Sheet</h2>
-        
-        <div class="subtitle">Market Schedule (EST)</div>
-        <table class="schedule-table">
-            <tr><td class="time-col">8:00 AM</td><td class="action-col"><span class="action-highlight">NY Open</span> (High Volatility)</td></tr>
-            <tr><td class="time-col">9:30 AM</td><td class="action-col">Stock Market Open</td></tr>
-            <tr><td class="time-col">12:00 PM</td><td class="action-col">London Close (Reversals)</td></tr>
-            <tr><td class="time-col">5:00 PM</td><td class="action-col"><span class="action-danger">Spread Widens</span> (Avoid)</td></tr>
-        </table>
-
-        <div class="subtitle" style="margin-top:20px;">Strategy Rules</div>
+        <h2 class="guide-header">
+            <span style="font-size:1.5rem;">🧠</span> Cheat Sheet
+        </h2>
+        <div class="subtitle" id="guideSubtitle">Strategy Rules</div>
         <div id="dynamic-strategy-rules">
             <!-- Content injected via JS -->
         </div>
@@ -774,9 +767,9 @@
         'US30':   { ts: 1.0,  tv: 5.0,  sym: 'US30' },
         'FOREX':  { ts: 0.00001, tv: 1.0, sym: 'EURUSD' },
         'JPY':    { ts: 0.001, tv: 0.68,  sym: 'USDJPY' },
-        'GOLD':   { ts: 0.01, tv: 1.0,   sym: 'XAUUSD' },
-        'WTI':    { ts: 0.01, tv: 10.0,  sym: 'USOIL' },
-        'CUSTOM': { ts: 1,    tv: 1,     sym: '' }
+        'GOLD':   { ts: 0.01, tv: 1.0,    sym: 'XAUUSD' },
+        'WTI':    { ts: 0.01, tv: 10.0,   sym: 'USOIL' },
+        'CUSTOM': { ts: 1,    tv: 1,      sym: '' }
     };
 
     function toggleHelp() {
@@ -1306,31 +1299,86 @@
     const STRATEGIES = {
         'contrarian': `
             <div class="guide-section">
-                <div class="guide-title">Trap Hunter (Contrarian)</div>
-                <div class="rule-box"><strong>1. Identify Levels:</strong> Higher timeframe Support/Resistance.</div>
-                <div class="rule-box"><strong>2. Wait for Fake-out:</strong> Liquidity grab beyond the level.</div>
-                <div class="rule-box"><strong>3. Execution:</strong> Enter on reversal candle closing back in range.</div>
+                <div class="guide-title">⏰ The Schedule (EST)</div>
+                <table class="schedule-table">
+                    <tr><td class="time-col">09:30 AM</td><td class="action-col action-danger">DO NOT TRADE (Fakes)</td></tr>
+                    <tr><td class="time-col">10:00 AM</td><td class="action-col action-highlight">REVERSAL (SFP)</td></tr>
+                    <tr><td class="time-col">12:00 PM</td><td class="action-col action-danger">NO TRADE (Chop)</td></tr>
+                    <tr><td class="time-col">02:00 PM</td><td class="action-col action-highlight">AFTERNOON REVERSAL</td></tr>
+                </table>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">📊 Timeframes</div>
+                <div class="rule-box"><strong>❌ 1 MINUTE:</strong> Only noise. Ignore it.</div>
+                <div class="rule-box"><strong>✅ 1 HOUR:</strong> Key Levels (Highs/Lows).</div>
+                <div class="rule-box"><strong>✅ 15 MINUTE:</strong> ENTRY. Wait for CLOSE.</div>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">🛡️ Golden Rule</div>
+                <div style="font-size:0.8rem; color:#ccc;">
+                    "I will not short a breakout until I see a candle <span style="color:var(--accent-orange); font-weight:bold;">try to go higher and FAIL</span>."
+                </div>
             </div>`,
         'trend': `
             <div class="guide-section">
-                <div class="guide-title">Trend Surfer</div>
-                <div class="rule-box"><strong>1. Structure:</strong> Identify Higher Highs/Lows.</div>
-                <div class="rule-box"><strong>2. Pullback:</strong> Wait for price to hit EMA or Fib 0.618.</div>
-                <div class="rule-box"><strong>3. Trigger:</strong> Engulfing or Pinbar in trend direction.</div>
+                <div class="guide-title">⏰ The Schedule (EST)</div>
+                <table class="schedule-table">
+                    <tr><td class="time-col">09:45 AM</td><td class="action-col action-highlight">CONTINUATION MOVE</td></tr>
+                    <tr><td class="time-col">11:00 AM</td><td class="action-col">Manage Stops</td></tr>
+                    <tr><td class="time-col">02:30 PM</td><td class="action-col action-highlight">TREND RESUMPTION</td></tr>
+                </table>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">📊 Timeframes</div>
+                <div class="rule-box"><strong>✅ 4 HOUR:</strong> Trend Direction (King).</div>
+                <div class="rule-box"><strong>✅ 15 MINUTE:</strong> Pullback Entry.</div>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">🛡️ Golden Rule</div>
+                <div style="font-size:0.8rem; color:#ccc;">
+                    "Never Short a Higher High. Never Buy a Lower Low. Wait for the <span style="color:var(--accent-orange); font-weight:bold;">Pullback to Support</span>."
+                </div>
             </div>`,
         'smc': `
             <div class="guide-section">
-                <div class="guide-title">Smart Money (ICT/SMC)</div>
-                <div class="rule-box"><strong>1. POI:</strong> Mark Order Blocks (OB) and Fair Value Gaps (FVG).</div>
-                <div class="rule-box"><strong>2. CHoCH:</strong> Wait for Change of Character on lower timeframe.</div>
-                <div class="rule-box"><strong>3. Entry:</strong> Retest of the Breaker Block.</div>
+                <div class="guide-title">⏰ The Schedule (EST)</div>
+                <table class="schedule-table">
+                    <tr><td class="time-col">08:30 AM</td><td class="action-col">News Injection</td></tr>
+                    <tr><td class="time-col">09:30 AM</td><td class="action-col action-danger">Judas Swing (Fake)</td></tr>
+                    <tr><td class="time-col">10:00 AM</td><td class="action-col action-highlight">Silver Bullet (Entry)</td></tr>
+                </table>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">📊 Concepts</div>
+                <div class="rule-box"><strong>💧 FVG (Gap):</strong> Entry Target.</div>
+                <div class="rule-box"><strong>🧱 OB (Block):</strong> Defensive Line.</div>
+                <div class="rule-box"><strong>🔁 MSS:</strong> Structure Shift (Confirmation).</div>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">🛡️ Golden Rule</div>
+                <div style="font-size:0.8rem; color:#ccc;">
+                    "Identify the <span style="color:var(--accent-orange); font-weight:bold;">Liquidity</span>. Wait for the run on stops, THEN the shift in structure."
+                </div>
             </div>`,
         'breakout': `
             <div class="guide-section">
-                <div class="guide-title">Momentum Breakout</div>
-                <div class="rule-box"><strong>1. Pattern:</strong> Identify Flags, Wedges, or Triangles.</div>
-                <div class="rule-box"><strong>2. Break:</strong> Wait for strong candle CLOSE outside pattern.</div>
-                <div class="rule-box"><strong>3. Stop:</strong> Below the breakout candle.</div>
+                <div class="guide-title">⏰ The Schedule (EST)</div>
+                <table class="schedule-table">
+                    <tr><td class="time-col">09:30 AM</td><td class="action-col action-highlight">OPENING RANGE BREAK</td></tr>
+                    <tr><td class="time-col">10:30 AM</td><td class="action-col">Europe Close (Vol)</td></tr>
+                </table>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">📊 Requirements</div>
+                <div class="rule-box"><strong>✅ PATTERN:</strong> Tight Wedge/Flag.</div>
+                <div class="rule-box"><strong>✅ VOLUME:</strong> Must Spike on Break.</div>
+                <div class="rule-box"><strong>✅ CLOSE:</strong> Candle must close OUT.</div>
+            </div>
+            <div class="guide-section">
+                <div class="guide-title">🛡️ Golden Rule</div>
+                <div style="font-size:0.8rem; color:#ccc;">
+                    "No Volume = Fakeout. If the candle closes back inside the range, <span style="color:var(--accent-red); font-weight:bold;">ABORT IMMEDIATELY</span>."
+                </div>
             </div>`,
         'auto': `
             <div class="guide-section">
@@ -1341,6 +1389,16 @@
 
     function updateGuide(style) {
         const container = document.getElementById('dynamic-strategy-rules');
+        const subtitles = {
+            'contrarian': 'Contrarian Strategy Rules',
+            'trend': 'Trend Following Rules',
+            'smc': 'Smart Money Concepts (ICT)',
+            'breakout': 'Momentum Breakout Rules',
+            'auto': 'Auto-Analysis Mode'
+        };
+        
+        document.getElementById('guideSubtitle').innerText = subtitles[style] || 'Strategy Rules';
+        
         if(STRATEGIES[style]) {
             container.innerHTML = STRATEGIES[style];
         } else {
