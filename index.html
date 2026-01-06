@@ -177,10 +177,12 @@
 
         .guide-panel { border-color: var(--accent-orange); }
         .checklist-panel { border-color: #00e676; }
+        .settings-panel { border-color: #fff; }
 
         .ai-header { color: var(--accent-purple); display:flex; align-items:center; justify-content: center; gap:8px;}
         .guide-header { color: var(--accent-orange); display:flex; align-items:center; justify-content: center; gap:8px;}
         .checklist-header { color: #00e676; display:flex; align-items:center; justify-content: center; gap:8px;}
+        .settings-header { color: #fff; display:flex; align-items:center; justify-content: center; gap:8px;}
         
         .drop-zone {
             border: 2px dashed #444;
@@ -468,7 +470,8 @@
             <h2 style="margin:0;">Pro Trade Calculator</h2>
             <div>
                 <button onclick="toggleAutoPilot()" style="background:none; border:none; cursor:pointer; font-size:1.2rem; margin-right:10px;" title="Toggle Auto-Pilot">🤖</button>
-                <button onclick="toggleHelp()" style="background:none; border:none; cursor:pointer; font-size:1.2rem; color:var(--text-muted);" title="Toggle Help Guides">ℹ️</button>
+                <button onclick="toggleHelp()" style="background:none; border:none; cursor:pointer; font-size:1.2rem; margin-right:10px;" title="Toggle Help Guides">ℹ️</button>
+                <button onclick="toggleSettings()" style="background:none; border:none; cursor:pointer; font-size:1.2rem;" title="Console Settings">⚙️</button>
             </div>
         </div>
         <div class="subtitle">Enter your setup</div>
@@ -570,7 +573,6 @@
                 <span class="status-dot" id="statusDot"></span>
                 <span id="statusText">Bridge Disconnected</span>
             </div>
-            <input type="text" id="bridgeUrl" value="http://localhost:5000/trade" style="display:none;">
         </div>
 
         <button class="btn-save" onclick="saveTradeToJournal()">💾 Save to Journal</button>
@@ -601,18 +603,6 @@
         </h2>
         <div class="subtitle">Upload chart for analysis</div>
 
-        <div class="form-group">
-            <label>Gemini API Key</label>
-            <div class="api-input-group">
-                <input type="password" id="apiKey" placeholder="Paste Key Here (Starts with AIza...)" onchange="saveApiKey()">
-                <button class="btn-clear" onclick="clearApiKey()">Clear</button>
-                <span class="api-toggle" onclick="toggleKeyVis()">👁️</span>
-            </div>
-            <div style="font-size:0.6rem; color:#666; margin-top:4px;">
-                Key is stored locally in your browser. <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#666;">Get Key</a>
-            </div>
-        </div>
-        
         <div class="grid-2">
             <div class="form-group">
                 <label>AI Model</label>
@@ -687,6 +677,35 @@
             [System] Ready to start...<br>
             [Note] Keeps browser open to run.
         </div>
+    </div>
+
+    <!-- SETTINGS PANEL (New: For Console Portability) -->
+    <div class="settings-panel panel help-panel" id="settingsPanel">
+        <h2 class="settings-header"><span>⚙️</span> Console Settings</h2>
+        <div class="subtitle">Connection Manager</div>
+        
+        <div class="form-group">
+            <label>Bridge URL (Target Computer)</label>
+            <input type="text" id="bridgeUrl" placeholder="http://192.168.1.XX:5000/trade" onchange="saveSettings()" value="http://localhost:5000/trade">
+            <div style="font-size:0.7rem; color:#666; margin-top:4px;">
+                Enter IP of PC running MT4. Use <strong>localhost</strong> if local.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Gemini API Key</label>
+            <div class="api-input-group">
+                <input type="password" id="apiKey" placeholder="Paste Key Here (Starts with AIza...)" onchange="saveApiKey()">
+                <button class="btn-clear" onclick="clearApiKey()">Clear</button>
+                <span class="api-toggle" onclick="toggleKeyVis()">👁️</span>
+            </div>
+        </div>
+
+        <hr style="border:0; border-top:1px solid #333; margin:20px 0;">
+        
+        <button class="btn-save" style="background:var(--accent-red); border-color:var(--accent-red);" onclick="resetConsole()">
+            ⚠️ Reset Console (Clear All Data)
+        </button>
     </div>
 
     <!-- GUIDE PANEL (Hidden) -->
@@ -776,6 +795,11 @@
     function toggleHelp() {
         const guide = document.getElementById('guidePanel');
         const checklist = document.getElementById('checklistPanel');
+        const settings = document.getElementById('settingsPanel');
+        
+        // Close settings if open
+        settings.style.display = 'none';
+
         if (guide.style.display === 'flex') {
             guide.style.display = 'none';
             checklist.style.display = 'none';
@@ -783,6 +807,23 @@
             guide.style.display = 'flex';
             checklist.style.display = 'flex';
             setTimeout(() => { guide.scrollIntoView({ behavior: 'smooth' }); }, 100);
+        }
+    }
+
+    function toggleSettings() {
+        const settings = document.getElementById('settingsPanel');
+        const guide = document.getElementById('guidePanel');
+        const checklist = document.getElementById('checklistPanel');
+        
+        // Close others
+        guide.style.display = 'none';
+        checklist.style.display = 'none';
+
+        if (settings.style.display === 'flex') {
+            settings.style.display = 'none';
+        } else {
+            settings.style.display = 'flex';
+            setTimeout(() => { settings.scrollIntoView({ behavior: 'smooth' }); }, 100);
         }
     }
 
@@ -836,11 +877,8 @@
         const dirBadge = document.getElementById('execDirection');
         let direction = "NEUTRAL";
 
-        if (balance && entry && sl && tickSize && tickValue) { // Added checks for TS/TV
+        if (balance && entry && sl && tickSize && tickValue) { 
             let totalRiskAllowance = balance * (riskPerc / 100);
-            // We assume 'fees' is the total roundtrip commission the user expects to pay for this trade.
-            // To stay within Risk Allowance: LossFromPrice + Fees <= TotalRiskAllowance
-            // LossFromPrice <= TotalRiskAllowance - Fees
             let riskForStopLoss = totalRiskAllowance - fees;
 
             if (sl < entry) { direction = "LONG (BUY)"; dirBadge.style.color = "#00e676"; } 
@@ -851,31 +889,22 @@
             } else {
                 const dist = Math.abs(entry - sl);
                 if (dist > 0) {
-                    // Value of a 1 unit move per lot (Standardized)
-                    // Formula: (Distance / TickSize) * TickValue
                     const lossPerLot = (dist / tickSize) * tickValue;
-                    
                     let lots = riskForStopLoss / lossPerLot;
                     
                     if (!isFinite(lots)) lots = 0;
                     if (lots < 0) lots = 0;
                     
-                    // Rounding Logic:
-                    // Use 2 decimals for standard, maybe 3 for small sizes < 0.1
                     displayLots = lots < 0.1 ? lots.toFixed(3) : lots.toFixed(2);
                     const actualLots = parseFloat(displayLots);
 
-                    // Recalculate Actual Metrics based on the rounded lots
-                    // Actual Risk = (PriceLoss) + Fees
                     riskCash = (actualLots * lossPerLot) + fees;
                     
                     if (tp) {
                         const tpDist = Math.abs(entry - tp);
                         const profitPerLot = (tpDist / tickSize) * tickValue;
-                        // Actual Profit = (PriceGain) - Fees
                         profitCash = (actualLots * profitPerLot) - fees;
                         
-                        // RR = Net Profit / Net Risk
                         if (riskCash > 0) {
                             rr = profitCash / riskCash;
                         }
@@ -888,7 +917,6 @@
         document.getElementById('riskDisplay').innerText = `Risk: $${riskCash.toFixed(2)}`;
         document.getElementById('profitDisplay').innerText = `Profit: $${profitCash.toFixed(2)}`;
         
-        // Format R:R
         let rrText = "R:R --";
         if (tp && rr !== 0) {
             rrText = `R:R 1:${rr.toFixed(2)}`;
@@ -948,6 +976,17 @@
         calc();
     }
     
+    function saveSettings() {
+        localStorage.setItem('bridge_url', document.getElementById('bridgeUrl').value);
+    }
+
+    function resetConsole() {
+        if(confirm("Are you sure? This will wipe all data including Journal and Keys.")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+
     /* =========================================
        MT4 BRIDGE LOGIC
        ========================================= */
@@ -979,16 +1018,7 @@
                 action = isLong ? "OP_BUY" : "OP_SELL";
                 finalPrice = 0; 
             } else {
-                // Pending Logic (Basic)
-                // If Entry > Current Price (for Buy) -> Buy Stop
-                // If Entry < Current Price (for Buy) -> Buy Limit
-                // For simplicity here, we map to simple LIMIT/STOP tokens if bridge supports, 
-                // OR we just send standard BUYLIMIT/SELLLIMIT and let MT4 reject if price is wrong side.
-                // Assuming bridge handles standard OP codes:
                 action = isLong ? "OP_BUYLIMIT" : "OP_SELLLIMIT"; 
-                // Note: Real MT4 requires distinguishing Limit vs Stop based on current price.
-                // If your bridge handles "OP_PENDING", use that. Otherwise:
-                // We'll stick to LIMIT for now as per previous version's simple logic.
                 finalPrice = entry;
             }
         }
@@ -1022,7 +1052,6 @@
                 statusText.innerText = "Trade Sent Successfully!";
                 statusDot.classList.add('active');
                 
-                // Add direction info for journal
                 let journalDir = action;
                 if(action.includes("BUY")) journalDir = "LONG (BUY)";
                 if(action.includes("SELL")) journalDir = "SHORT (SELL)";
@@ -1038,7 +1067,7 @@
             statusText.innerText = "Connection Failed";
             statusDot.classList.add('error');
             console.error(error);
-            alert("Failed to connect to Python Bridge (localhost:5000). Ensure bridge.py is running.");
+            alert(`Failed to connect to Bridge at: ${bridgeUrl}\n\nCheck Console Settings ⚙️ if using a remote computer.`);
         }
     }
 
@@ -1047,8 +1076,8 @@
        ========================================= */
     let apInterval = null;
     let isAutoRunning = false;
-    let priceHistory = []; // Stores recent prices for AI context
-    let lastBridgeSymbol = ""; // Store for sync
+    let priceHistory = []; 
+    let lastBridgeSymbol = ""; 
     
     async function fetchPrice() {
         const bridgeUrl = document.getElementById('bridgeUrl').value.replace('/trade', '/price');
@@ -1090,7 +1119,7 @@
                     return data.bitcoin.usd;
                 } catch(err) { return null; }
             }
-            document.getElementById('priceSource').innerText = "Source: Disconnected (Start Bridge!)";
+            document.getElementById('priceSource').innerText = "Source: Disconnected";
             document.getElementById('priceSource').style.color = "#ff1744";
             return null;
         }
@@ -1114,7 +1143,7 @@
 
     // --- TECHNICAL INDICATOR HELPERS ---
     function calculateRSI(prices, period = 14) {
-        if (prices.length < period + 1) return 50; // Not enough data
+        if (prices.length < period + 1) return 50; 
         let gains = 0, losses = 0;
         for (let i = prices.length - period; i < prices.length; i++) {
             const diff = prices[i] - prices[i - 1];
@@ -1729,6 +1758,12 @@
         document.getElementById('mt4Symbol').value = localStorage.getItem('univ_mt4sym');
     } else {
         if(savedType) document.getElementById('mt4Symbol').value = PRESETS[savedType].sym;
+    }
+    
+    // Load Custom Bridge URL
+    if (localStorage.getItem('bridge_url')) {
+        const savedUrl = localStorage.getItem('bridge_url');
+        document.getElementById('bridgeUrl').value = savedUrl;
     }
 
     calc();
