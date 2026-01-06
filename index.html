@@ -276,6 +276,15 @@
         .guide-section { margin-bottom: 20px; }
         .guide-title { font-weight: bold; color: var(--accent-orange); font-size: 0.9rem; margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 5px; }
         
+        /* RESTORED: Schedule Table Styles */
+        .schedule-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 10px; margin-bottom: 20px; }
+        .schedule-table td { padding: 6px 0; border-bottom: 1px solid #333; }
+        .schedule-table tr:last-child td { border-bottom: none; }
+        .time-col { color: var(--text-main); font-weight: bold; width: 90px; }
+        .action-col { color: #aaa; }
+        .action-highlight { color: var(--accent-green); font-weight: bold; }
+        .action-danger { color: var(--accent-red); font-weight: bold; }
+
         .rule-box { background: #252525; padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.8rem; border-left: 3px solid var(--accent-orange); }
         .rule-box strong { color: white; display: block; margin-bottom: 4px; }
         .rule-list { margin: 5px 0 0 15px; padding: 0; color: #aaa; }
@@ -682,42 +691,18 @@
     <!-- GUIDE PANEL (Hidden) -->
     <div class="guide-panel panel help-panel" id="guidePanel">
         <h2 class="guide-header"><span style="font-size:1.5rem;">🧠</span> Cheat Sheet</h2>
-        <div class="subtitle">Strategy Rules</div>
         
-        <div id="guide-content" class="strategy-guide">
-            <div class="guide-section">
-                <div class="guide-title">1. IDENTIFY LEVELS</div>
-                <div class="rule-box">
-                    Find key Support & Resistance on higher timeframes (H1, H4, D1). Draw horizontal lines at these swing points.
-                </div>
-            </div>
-            
-            <div class="guide-section">
-                <div class="guide-title">2. WAIT FOR FAKE-OUT</div>
-                <div class="rule-box">
-                    <strong>Liquidity Grab</strong>
-                    Do NOT enter on the initial breakout. Watch for price to push BEYOND the level to trap traders.
-                </div>
-            </div>
+        <div class="subtitle">Market Schedule (EST)</div>
+        <table class="schedule-table">
+            <tr><td class="time-col">8:00 AM</td><td class="action-col"><span class="action-highlight">NY Open</span> (High Volatility)</td></tr>
+            <tr><td class="time-col">9:30 AM</td><td class="action-col">Stock Market Open</td></tr>
+            <tr><td class="time-col">12:00 PM</td><td class="action-col">London Close (Reversals)</td></tr>
+            <tr><td class="time-col">5:00 PM</td><td class="action-col"><span class="action-danger">Spread Widens</span> (Avoid)</td></tr>
+        </table>
 
-            <div class="guide-section">
-                <div class="guide-title">3. CONFIRMATION</div>
-                <div class="rule-box">
-                    Wait for a reversal candle (Pinbar, Engulfing).
-                    <strong>CRITICAL:</strong> Candle must CLOSE back inside the original range.
-                </div>
-            </div>
-
-            <div class="guide-section">
-                <div class="guide-title">4. EXECUTION</div>
-                <div class="rule-box">
-                    Enter on close of reversal candle.
-                    <ul class="rule-list">
-                        <li>SL: Just beyond the swing high/low</li>
-                        <li>TP: Opposite side of range</li>
-                    </ul>
-                </div>
-            </div>
+        <div class="subtitle" style="margin-top:20px;">Strategy Rules</div>
+        <div id="dynamic-strategy-rules">
+            <!-- Content injected via JS -->
         </div>
     </div>
 
@@ -1319,21 +1304,54 @@
 
     // 1. Guide Logic
     const STRATEGIES = {
-        'contrarian': "<h3>Trap Hunter Rules</h3><ul><li>Identify key support/resistance levels.</li><li>Wait for a fake-out (liquidity grab) beyond the level.</li><li>Enter on the reversal candle closing back inside range.</li><li>Target the opposite side of the range.</li></ul>",
-        'trend': "<h3>Trend Surfer Rules</h3><ul><li>Identify higher highs/higher lows (Uptrend).</li><li>Wait for pullback to EMA or Fibonacci level (0.5/0.618).</li><li>Enter on bullish engulfing or pinbar.</li><li>Ride until structure breaks.</li></ul>",
-        'smc': "<h3>Smart Money Concepts</h3><ul><li>Mark out Order Blocks (OB) and Fair Value Gaps (FVG).</li><li>Wait for price to tap into the zone.</li><li>Look for Change of Character (CHoCH) on lower timeframe.</li><li>Enter on the retest of the breaker block.</li></ul>",
-        'breakout': "<h3>Momentum Breakout</h3><ul><li>Identify consolidation patterns (Triangle, Flag).</li><li>Wait for a strong candle close outside the pattern.</li><li>Enter on the retest of the breakout line (conservative) or immediately (aggressive).</li><li>SL below the breakout candle.</li></ul>"
+        'contrarian': `
+            <div class="guide-section">
+                <div class="guide-title">Trap Hunter (Contrarian)</div>
+                <div class="rule-box"><strong>1. Identify Levels:</strong> Higher timeframe Support/Resistance.</div>
+                <div class="rule-box"><strong>2. Wait for Fake-out:</strong> Liquidity grab beyond the level.</div>
+                <div class="rule-box"><strong>3. Execution:</strong> Enter on reversal candle closing back in range.</div>
+            </div>`,
+        'trend': `
+            <div class="guide-section">
+                <div class="guide-title">Trend Surfer</div>
+                <div class="rule-box"><strong>1. Structure:</strong> Identify Higher Highs/Lows.</div>
+                <div class="rule-box"><strong>2. Pullback:</strong> Wait for price to hit EMA or Fib 0.618.</div>
+                <div class="rule-box"><strong>3. Trigger:</strong> Engulfing or Pinbar in trend direction.</div>
+            </div>`,
+        'smc': `
+            <div class="guide-section">
+                <div class="guide-title">Smart Money (ICT/SMC)</div>
+                <div class="rule-box"><strong>1. POI:</strong> Mark Order Blocks (OB) and Fair Value Gaps (FVG).</div>
+                <div class="rule-box"><strong>2. CHoCH:</strong> Wait for Change of Character on lower timeframe.</div>
+                <div class="rule-box"><strong>3. Entry:</strong> Retest of the Breaker Block.</div>
+            </div>`,
+        'breakout': `
+            <div class="guide-section">
+                <div class="guide-title">Momentum Breakout</div>
+                <div class="rule-box"><strong>1. Pattern:</strong> Identify Flags, Wedges, or Triangles.</div>
+                <div class="rule-box"><strong>2. Break:</strong> Wait for strong candle CLOSE outside pattern.</div>
+                <div class="rule-box"><strong>3. Stop:</strong> Below the breakout candle.</div>
+            </div>`,
+        'auto': `
+            <div class="guide-section">
+                <div class="guide-title">AI Auto-Analysis</div>
+                <div class="rule-box">Upload a chart image. The AI will determine the market structure and suggest the best strategy.</div>
+            </div>`
     };
 
     function updateGuide(style) {
-        // We use the fixed HTML structure now for Trap Hunter, this is for AI fallback or style switching
-        // Keeping it simple for now
+        const container = document.getElementById('dynamic-strategy-rules');
+        if(STRATEGIES[style]) {
+            container.innerHTML = STRATEGIES[style];
+        } else {
+            container.innerHTML = STRATEGIES['auto'];
+        }
     }
 
     function saveStyle() {
         const val = document.getElementById('styleSelect').value;
         localStorage.setItem('gemini_style', val);
-        // updateGuide(val);
+        updateGuide(val);
     }
 
     // 2. API & Inputs
@@ -1527,8 +1545,10 @@
     if (localStorage.getItem('gemini_style')) {
         const savedStyle = localStorage.getItem('gemini_style');
         document.getElementById('styleSelect').value = savedStyle;
+        updateGuide(savedStyle);
     } else {
         document.getElementById('styleSelect').value = 'contrarian'; // Default
+        updateGuide('contrarian');
     }
 
     if (localStorage.getItem('univ_bal')) document.getElementById('balance').value = localStorage.getItem('univ_bal');
